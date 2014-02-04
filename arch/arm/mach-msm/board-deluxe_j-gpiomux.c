@@ -24,7 +24,7 @@
 #include <mach/gpiomux.h>
 #include <mach/socinfo.h>
 #include "devices.h"
-#include "board-monarudo.h"
+#include "board-deluxe_j.h"
 
 
 static struct gpiomux_setting  mi2s_rx_sclk = {

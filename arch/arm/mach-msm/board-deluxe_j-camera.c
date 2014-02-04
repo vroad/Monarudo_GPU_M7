@@ -20,7 +20,7 @@
 #include <asm/setup.h>
 
 #include "devices.h"
-#include "board-monarudo.h"
+#include "board-deluxe_j.h"
 
 #include <linux/spi/spi.h>
 

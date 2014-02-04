@@ -21,7 +21,7 @@
 #include <mach/board_htc.h>
 #include <mach/gpio.h>
 #include <linux/mfd/pm8xxx/pm8921.h>
-#include "board-monarudo.h"
+#include "board-deluxe_j.h"
 
 #undef MODULE_PARAM_PREFIX
 #define MODULE_PARAM_PREFIX "board_monarudo."

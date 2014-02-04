@@ -26,7 +26,7 @@
 #include <mach/panel_id.h>
 #include <mach/debug_display.h>
 #include "devices.h"
-#include "board-monarudo.h"
+#include "board-deluxe_j.h"
 #include <linux/mfd/pm8xxx/pm8921.h>
 #include <mach/gpio.h>
 #include <mach/gpiomux.h>

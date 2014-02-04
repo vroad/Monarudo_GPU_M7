@@ -25,7 +25,7 @@
 
 #include <mach/msm_xo.h>
 
-#include "board-monarudo.h"
+#include "board-deluxe_j.h"
 
 static struct rfkill *bt_rfk;
 static const char bt_name[] = "bcm4334";

@@ -25,7 +25,7 @@
 #include <mach/gpio.h>
 #include <mach/gpiomux.h>
 #include "devices.h"
-#include "board-monarudo.h"
+#include "board-deluxe_j.h"
 #include "board-storage-common-a.h"
 
 

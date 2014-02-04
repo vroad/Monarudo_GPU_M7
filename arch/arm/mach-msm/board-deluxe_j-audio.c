@@ -19,7 +19,7 @@
 #include <sound/pcm.h>
 #include <sound/q6asm.h>
 #include <linux/module.h>
-#include "board-monarudo.h"
+#include "board-deluxe_j.h"
 #include "../sound/soc/msm/msm-pcm-routing.h"
 #include "../sound/soc/msm/msm-compr-q6.h"
 #include <linux/gpio.h>

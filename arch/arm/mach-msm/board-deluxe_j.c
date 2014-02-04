@@ -88,7 +88,7 @@
 #endif
 
 #include <mach/msm_watchdog.h>
-#include "board-monarudo.h"
+#include "board-deluxe_j.h"
 #include "spm.h"
 #include <mach/mpm.h>
 #include "rpm_resources.h"
