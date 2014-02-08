@@ -72,21 +72,21 @@ struct msm_xo_voter *wa_xo;
 #define HDMI_PANEL_NAME "hdmi_msm"
 #define TVOUT_PANEL_NAME "tvout_msm"
 
-static int monarudo_detect_panel(const char *name)
+static int deluxe_j_detect_panel(const char *name)
 {
 #if 0
 	if (panel_type == PANEL_ID_DLX_SONY_RENESAS) {
 		if (!strncmp(name, MIPI_RENESAS_PANEL_NAME,
 			strnlen(MIPI_RENESAS_PANEL_NAME,
 				PANEL_NAME_MAX_LEN))){
-			PR_DISP_INFO("monarudo_%s\n", name);
+			PR_DISP_INFO("deluxe_j_%s\n", name);
 			return 0;
 		}
 	} else if (panel_type == PANEL_ID_DLX_SHARP_RENESAS) {
 		if (!strncmp(name, MIPI_RENESAS_PANEL_NAME,
 			strnlen(MIPI_RENESAS_PANEL_NAME,
 				PANEL_NAME_MAX_LEN))){
-			PR_DISP_INFO("monarudo_%s\n", name);
+			PR_DISP_INFO("deluxe_j_%s\n", name);
 			return 0;
 		}
 	}
@@ -98,17 +98,9 @@ static int monarudo_detect_panel(const char *name)
 
 	return -ENODEV;
 }
-#ifdef CONFIG_UPDATE_LCDC_LUT
-int update_preset_lcdc_lut(void)
-{
-  return 0;
-}
-#endif
+
 static struct msm_fb_platform_data msm_fb_pdata = {
-	.detect_client = monarudo_detect_panel,
-#ifdef CONFIG_UPDATE_LCDC_LUT
-  .update_lcdc_lut = update_preset_lcdc_lut,
-#endif
+	.detect_client = deluxe_j_detect_panel,
 };
 
 static struct platform_device msm_fb_device = {
@@ -119,7 +111,7 @@ static struct platform_device msm_fb_device = {
 	.dev.platform_data = &msm_fb_pdata,
 };
 
-void __init monarudo_allocate_fb_region(void)
+void __init deluxe_j_allocate_fb_region(void)
 {
 	void *addr;
 	unsigned long size;
@@ -256,7 +248,16 @@ static struct lcdc_platform_data dtv_pdata = {
 };
 #endif
 
-struct mdp_reg mdp_gamma[] = {
+static int mdp_core_clk_rate_table[] = {
+	200000000,
+	200000000,
+	200000000,
+	200000000,
+};
+struct mdp_reg *mdp_gamma = NULL;
+int mdp_gamma_count = 0;
+
+struct mdp_reg mdp_gamma_sharp[] = {
         {0x94800, 0x000000, 0x0},
         {0x94804, 0x010101, 0x0},
         {0x94808, 0x020202, 0x0},
@@ -537,15 +538,279 @@ struct mdp_reg mdp_gamma[] = {
         {0x90070, 0x0F, 0x0},
 };
 
-int monarudo_mdp_gamma(void)
+struct mdp_reg mdp_gamma_sony[] = {
+        {0x94800, 0x000000, 0x0},
+        {0x94804, 0x010101, 0x0},
+        {0x94808, 0x020202, 0x0},
+        {0x9480C, 0x040404, 0x0},
+        {0x94810, 0x050505, 0x0},
+        {0x94814, 0x060606, 0x0},
+        {0x94818, 0x080808, 0x0},
+        {0x9481C, 0x090909, 0x0},
+        {0x94820, 0x0A0A0A, 0x0},
+        {0x94824, 0x0C0C0C, 0x0},
+        {0x94828, 0x0D0D0D, 0x0},
+        {0x9482C, 0x0E0E0E, 0x0},
+        {0x94830, 0x0F0F0F, 0x0},
+        {0x94834, 0x111111, 0x0},
+        {0x94838, 0x121212, 0x0},
+        {0x9483C, 0x131313, 0x0},
+        {0x94840, 0x141414, 0x0},
+        {0x94844, 0x151515, 0x0},
+        {0x94848, 0x161616, 0x0},
+        {0x9484C, 0x181818, 0x0},
+        {0x94850, 0x19191A, 0x0},
+        {0x94854, 0x1A1A1B, 0x0},
+        {0x94858, 0x1B1B1C, 0x0},
+        {0x9485C, 0x1B1C1D, 0x0},
+        {0x94860, 0x1C1D1E, 0x0},
+        {0x94864, 0x1E1F20, 0x0},
+        {0x94868, 0x1F2021, 0x0},
+        {0x9486C, 0x202122, 0x0},
+        {0x94870, 0x212223, 0x0},
+        {0x94874, 0x222324, 0x0},
+        {0x94878, 0x232425, 0x0},
+        {0x9487C, 0x242526, 0x0},
+        {0x94880, 0x252627, 0x0},
+        {0x94884, 0x262728, 0x0},
+        {0x94888, 0x28292A, 0x0},
+        {0x9488C, 0x292A2B, 0x0},
+        {0x94890, 0x2A2B2C, 0x0},
+        {0x94894, 0x2B2C2D, 0x0},
+        {0x94898, 0x2C2D2E, 0x0},
+        {0x9489C, 0x2D2E2F, 0x0},
+        {0x948A0, 0x2E2F30, 0x0},
+        {0x948A4, 0x303030, 0x0},
+        {0x948A8, 0x303131, 0x0},
+        {0x948AC, 0x313233, 0x0},
+        {0x948B0, 0x323334, 0x0},
+        {0x948B4, 0x343536, 0x0},
+        {0x948B8, 0x353637, 0x0},
+        {0x948BC, 0x363738, 0x0},
+        {0x948C0, 0x373839, 0x0},
+        {0x948C4, 0x38393A, 0x0},
+        {0x948C8, 0x393A3B, 0x0},
+        {0x948CC, 0x3A3B3C, 0x0},
+        {0x948D0, 0x3B3C3D, 0x0},
+        {0x948D4, 0x3C3D3E, 0x0},
+        {0x948D8, 0x3D3E3F, 0x0},
+        {0x948DC, 0x3E3F40, 0x0},
+        {0x948E0, 0x3F4041, 0x0},
+        {0x948E4, 0x404142, 0x0},
+        {0x948E8, 0x414242, 0x0},
+        {0x948EC, 0x424343, 0x0},
+        {0x948F0, 0x424444, 0x0},
+        {0x948F4, 0x434545, 0x0},
+        {0x948F8, 0x454646, 0x0},
+        {0x948FC, 0x464747, 0x0},
+        {0x94900, 0x474848, 0x0},
+        {0x94904, 0x494A4A, 0x0},
+        {0x94908, 0x4A4B4B, 0x0},
+        {0x9490C, 0x4B4C4C, 0x0},
+        {0x94910, 0x4C4D4D, 0x0},
+        {0x94914, 0x4D4E4E, 0x0},
+        {0x94918, 0x4E4F4F, 0x0},
+        {0x9491C, 0x4F5050, 0x0},
+        {0x94920, 0x505151, 0x0},
+        {0x94924, 0x515252, 0x0},
+        {0x94928, 0x525353, 0x0},
+        {0x9492C, 0x535454, 0x0},
+        {0x94930, 0x545555, 0x0},
+        {0x94934, 0x555656, 0x0},
+        {0x94938, 0x555757, 0x0},
+        {0x9493C, 0x565858, 0x0},
+        {0x94940, 0x575959, 0x0},
+        {0x94944, 0x585A5A, 0x0},
+        {0x94948, 0x595B5B, 0x0},
+        {0x9494C, 0x5A5C5C, 0x0},
+        {0x94950, 0x5B5D5D, 0x0},
+        {0x94954, 0x5C5E5E, 0x0},
+        {0x94958, 0x5D5F5F, 0x0},
+        {0x9495C, 0x5E6060, 0x0},
+        {0x94960, 0x5F6161, 0x0},
+        {0x94964, 0x606262, 0x0},
+        {0x94968, 0x616363, 0x0},
+        {0x9496C, 0x626364, 0x0},
+        {0x94970, 0x636466, 0x0},
+        {0x94974, 0x646567, 0x0},
+        {0x94978, 0x656668, 0x0},
+        {0x9497C, 0x656769, 0x0},
+        {0x94980, 0x67686A, 0x0},
+        {0x94984, 0x68696B, 0x0},
+        {0x94988, 0x696A6C, 0x0},
+        {0x9498C, 0x6A6B6D, 0x0},
+        {0x94990, 0x6B6C6E, 0x0},
+        {0x94994, 0x6C6D6F, 0x0},
+        {0x94998, 0x6D6E70, 0x0},
+        {0x9499C, 0x6E6F71, 0x0},
+        {0x949A0, 0x6F7072, 0x0},
+        {0x949A4, 0x707173, 0x0},
+        {0x949A8, 0x717274, 0x0},
+        {0x949AC, 0x727375, 0x0},
+        {0x949B0, 0x737476, 0x0},
+        {0x949B4, 0x747577, 0x0},
+        {0x949B8, 0x757678, 0x0},
+        {0x949BC, 0x767779, 0x0},
+        {0x949C0, 0x77787A, 0x0},
+        {0x949C4, 0x77797B, 0x0},
+        {0x949C8, 0x787A7C, 0x0},
+        {0x949CC, 0x797B7D, 0x0},
+        {0x949D0, 0x7A7C7E, 0x0},
+        {0x949D4, 0x7A7C7E, 0x0},
+        {0x949D8, 0x7B7D7F, 0x0},
+        {0x949DC, 0x7C7E80, 0x0},
+        {0x949E0, 0x7D7F81, 0x0},
+        {0x949E4, 0x7E8082, 0x0},
+        {0x949E8, 0x7F8183, 0x0},
+        {0x949EC, 0x808284, 0x0},
+        {0x949F0, 0x818385, 0x0},
+        {0x949F4, 0x828485, 0x0},
+        {0x949F8, 0x838586, 0x0},
+        {0x949FC, 0x848687, 0x0},
+        {0x94A00, 0x858788, 0x0},
+        {0x94A04, 0x868889, 0x0},
+        {0x94A08, 0x87898A, 0x0},
+        {0x94A0C, 0x878A8B, 0x0},
+        {0x94A10, 0x888B8C, 0x0},
+        {0x94A14, 0x8A8C8D, 0x0},
+        {0x94A18, 0x8B8D8E, 0x0},
+        {0x94A1C, 0x8C8E8F, 0x0},
+        {0x94A20, 0x8D8F90, 0x0},
+        {0x94A24, 0x8E9091, 0x0},
+        {0x94A28, 0x8F9192, 0x0},
+        {0x94A2C, 0x909293, 0x0},
+        {0x94A30, 0x919394, 0x0},
+        {0x94A34, 0x929495, 0x0},
+        {0x94A38, 0x939596, 0x0},
+        {0x94A3C, 0x949697, 0x0},
+        {0x94A40, 0x949697, 0x0},
+        {0x94A44, 0x959799, 0x0},
+        {0x94A48, 0x96989A, 0x0},
+        {0x94A4C, 0x97999B, 0x0},
+        {0x94A50, 0x979A9C, 0x0},
+        {0x94A54, 0x989B9D, 0x0},
+        {0x94A58, 0x999C9E, 0x0},
+        {0x94A5C, 0x9A9D9F, 0x0},
+        {0x94A60, 0x9B9EA0, 0x0},
+        {0x94A64, 0x9C9FA1, 0x0},
+        {0x94A68, 0x9DA0A2, 0x0},
+        {0x94A6C, 0x9EA1A3, 0x0},
+        {0x94A70, 0x9FA2A4, 0x0},
+        {0x94A74, 0xA0A3A5, 0x0},
+        {0x94A78, 0xA1A4A6, 0x0},
+        {0x94A7C, 0xA2A5A7, 0x0},
+        {0x94A80, 0xA3A6A8, 0x0},
+        {0x94A84, 0xA4A7A9, 0x0},
+        {0x94A88, 0xA5A8AA, 0x0},
+        {0x94A8C, 0xA5A8AA, 0x0},
+        {0x94A90, 0xA6A9AB, 0x0},
+        {0x94A94, 0xA6AAAC, 0x0},
+        {0x94A98, 0xA7ABAD, 0x0},
+        {0x94A9C, 0xA8ACAE, 0x0},
+        {0x94AA0, 0xA9ADAF, 0x0},
+        {0x94AA4, 0xAAAEB0, 0x0},
+        {0x94AA8, 0xACAFB1, 0x0},
+        {0x94AAC, 0xADB0B2, 0x0},
+        {0x94AB0, 0xAEB1B3, 0x0},
+        {0x94AB4, 0xAFB2B4, 0x0},
+        {0x94AB8, 0xB0B3B5, 0x0},
+        {0x94ABC, 0xB1B4B6, 0x0},
+        {0x94AC0, 0xB2B5B7, 0x0},
+        {0x94AC4, 0xB3B6B8, 0x0},
+        {0x94AC8, 0xB4B7B9, 0x0},
+        {0x94ACC, 0xB4B7B9, 0x0},
+        {0x94AD0, 0xB5B8BA, 0x0},
+        {0x94AD4, 0xB6B9BB, 0x0},
+        {0x94AD8, 0xB6BABC, 0x0},
+        {0x94ADC, 0xB7BBBD, 0x0},
+        {0x94AE0, 0xB8BCBE, 0x0},
+        {0x94AE4, 0xB9BDBF, 0x0},
+        {0x94AE8, 0xBABEC0, 0x0},
+        {0x94AEC, 0xBBBFC1, 0x0},
+        {0x94AF0, 0xBCC0C2, 0x0},
+        {0x94AF4, 0xBDC1C3, 0x0},
+        {0x94AF8, 0xBEC2C4, 0x0},
+        {0x94AFC, 0xBFC3C5, 0x0},
+        {0x94B00, 0xC0C4C6, 0x0},
+        {0x94B04, 0xC0C4C6, 0x0},
+        {0x94B08, 0xC1C5C7, 0x0},
+        {0x94B0C, 0xC2C6C8, 0x0},
+        {0x94B10, 0xC3C6C8, 0x0},
+        {0x94B14, 0xC4C7C9, 0x0},
+        {0x94B18, 0xC5C8CA, 0x0},
+        {0x94B1C, 0xC5C9CC, 0x0},
+        {0x94B20, 0xC6CACD, 0x0},
+        {0x94B24, 0xC7CBCE, 0x0},
+        {0x94B28, 0xC8CCCF, 0x0},
+        {0x94B2C, 0xC9CDD0, 0x0},
+        {0x94B30, 0xCACED1, 0x0},
+        {0x94B34, 0xCBCFD2, 0x0},
+        {0x94B38, 0xCBCFD2, 0x0},
+        {0x94B3C, 0xCCD0D3, 0x0},
+        {0x94B40, 0xCED1D4, 0x0},
+        {0x94B44, 0xCFD2D5, 0x0},
+        {0x94B48, 0xD0D3D6, 0x0},
+        {0x94B4C, 0xD1D4D7, 0x0},
+        {0x94B50, 0xD2D5D8, 0x0},
+        {0x94B54, 0xD3D6D9, 0x0},
+        {0x94B58, 0xD4D7DA, 0x0},
+        {0x94B5C, 0xD5D8DB, 0x0},
+        {0x94B60, 0xD5D9DC, 0x0},
+        {0x94B64, 0xD6DADD, 0x0},
+        {0x94B68, 0xD6DADD, 0x0},
+        {0x94B6C, 0xD7DBDE, 0x0},
+        {0x94B70, 0xD8DCDF, 0x0},
+        {0x94B74, 0xD9DDE0, 0x0},
+        {0x94B78, 0xDADEE1, 0x0},
+        {0x94B7C, 0xDBDFE2, 0x0},
+        {0x94B80, 0xDCE0E3, 0x0},
+        {0x94B84, 0xDDE1E4, 0x0},
+        {0x94B88, 0xDEE2E5, 0x0},
+        {0x94B8C, 0xDFE3E6, 0x0},
+        {0x94B90, 0xE0E4E7, 0x0},
+        {0x94B94, 0xE0E4E7, 0x0},
+        {0x94B98, 0xE1E5E8, 0x0},
+        {0x94B9C, 0xE2E6E9, 0x0},
+        {0x94BA0, 0xE3E7EA, 0x0},
+        {0x94BA4, 0xE4E8EB, 0x0},
+        {0x94BA8, 0xE4E9EC, 0x0},
+        {0x94BAC, 0xE5EAED, 0x0},
+        {0x94BB0, 0xE6EBEE, 0x0},
+        {0x94BB4, 0xE7ECEF, 0x0},
+        {0x94BB8, 0xE8EDF0, 0x0},
+        {0x94BBC, 0xE9EEF1, 0x0},
+        {0x94BC0, 0xE9EEF1, 0x0},
+        {0x94BC4, 0xEAEFF2, 0x0},
+        {0x94BC8, 0xEBF0F3, 0x0},
+        {0x94BCC, 0xECF1F4, 0x0},
+        {0x94BD0, 0xEDF2F5, 0x0},
+        {0x94BD4, 0xEEF3F6, 0x0},
+        {0x94BD8, 0xEFF4F7, 0x0},
+        {0x94BDC, 0xF1F5F8, 0x0},
+        {0x94BE0, 0xF2F6F9, 0x0},
+        {0x94BE4, 0xF3F7FA, 0x0},
+        {0x94BE8, 0xF3F7FA, 0x0},
+        {0x94BEC, 0xF3F8FB, 0x0},
+        {0x94BF0, 0xF4F9FC, 0x0},
+        {0x94BF4, 0xF5FAFD, 0x0},
+        {0x94BF8, 0xF6FBFE, 0x0},
+        {0x94BFC, 0xF7FCFF, 0x0},
+        {0x90070, 0x0F, 0x0},
+};
+int deluxe_j_mdp_gamma(void)
 {
-	mdp_color_enhancement(mdp_gamma, ARRAY_SIZE(mdp_gamma));
+	if (mdp_gamma == NULL)
+		return 0;
+
+	mdp_color_enhancement(mdp_gamma, mdp_gamma_count);
 	return 0;
 }
 
-
 static struct msm_panel_common_pdata mdp_pdata = {
 	.gpio = MDP_VSYNC_GPIO,
+	.mdp_core_clk_rate = 200000000,
+	.mdp_core_clk_table = mdp_core_clk_rate_table,
+	.num_mdp_clk = ARRAY_SIZE(mdp_core_clk_rate_table),
 #ifdef CONFIG_MSM_BUS_SCALING
 	.mdp_bus_scale_table = &mdp_bus_scale_pdata,
 #endif
@@ -556,35 +821,12 @@ static struct msm_panel_common_pdata mdp_pdata = {
 	.mem_hid = MEMTYPE_EBI1,
 #endif
 	.cont_splash_enabled = 0x01,
+	.mdp_gamma = deluxe_j_mdp_gamma,
 	.mdp_iommu_split_domain = 1,
-	.mdp_gamma = monarudo_mdp_gamma,
 	.mdp_max_clk = 200000000,
 };
 
-static char wfd_check_mdp_iommu_split_domain(void)
-{
-    return mdp_pdata.mdp_iommu_split_domain;
-}
-
-#ifdef CONFIG_FB_MSM_WRITEBACK_MSM_PANEL
-static struct msm_wfd_platform_data wfd_pdata = {
-    .wfd_check_mdp_iommu_split = wfd_check_mdp_iommu_split_domain,
-};
-
-static struct platform_device wfd_panel_device = {
-    .name = "wfd_panel",
-    .id = 0,
-    .dev.platform_data = NULL,
-};
-
-static struct platform_device wfd_device = {
-    .name          = "msm_wfd",
-    .id            = -1,
-    .dev.platform_data = &wfd_pdata,
-};
-#endif
-
-void __init monarudo_mdp_writeback(struct memtype_reserve* reserve_table)
+void __init deluxe_j_mdp_writeback(struct memtype_reserve* reserve_table)
 {
 	mdp_pdata.ov0_wb_size = MSM_FB_OVERLAY0_WRITEBACK_SIZE;
 	mdp_pdata.ov1_wb_size = MSM_FB_OVERLAY1_WRITEBACK_SIZE;
@@ -596,17 +838,14 @@ void __init monarudo_mdp_writeback(struct memtype_reserve* reserve_table)
 #endif
 }
 static int first_init = 1;
-uint32_t cfg_panel_te_active[] = {GPIO_CFG(LCD_TE, 1, GPIO_CFG_INPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA)};
-uint32_t cfg_panel_te_sleep[] = {GPIO_CFG(LCD_TE, 0, GPIO_CFG_INPUT, GPIO_CFG_PULL_DOWN, GPIO_CFG_2MA)};
-
+static bool dsi_power_on;
 static int mipi_dsi_panel_power(int on)
 {
-        static bool dsi_power_on = false;
 	static struct regulator *reg_lvs5, *reg_l2;
 	static int gpio36, gpio37;
 	int rc;
 
-	pr_debug("%s: on=%d\n", __func__, on);
+	PR_DISP_INFO("%s: on=%d\n", __func__, on);
 
 	if (!dsi_power_on) {
 		reg_lvs5 = regulator_get(&msm_mipi_dsi1_device.dev,
@@ -702,13 +941,8 @@ static int mipi_dsi_panel_power(int on)
 			msm_xo_mode_vote(wa_xo, MSM_XO_MODE_OFF);
 		}
 	} else {
-		if (system_rev == XB) {
-			gpio_tlmm_config(GPIO_CFG(MBAT_IN_XA_XB, 0, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA), GPIO_CFG_ENABLE);
-			gpio_set_value(MBAT_IN_XA_XB, 0);
-		} else if (system_rev >= XC) {
-			gpio_tlmm_config(GPIO_CFG(BL_HW_EN_XC_XD, 0, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA), GPIO_CFG_ENABLE);
-			gpio_set_value(BL_HW_EN_XC_XD, 0);
-		}
+		gpio_tlmm_config(GPIO_CFG(BL_HW_EN, 0, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA), GPIO_CFG_ENABLE);
+		gpio_set_value(BL_HW_EN, 0);
 
 		gpio_set_value(LCD_RST, 0);
 		msleep(10);
@@ -735,10 +969,10 @@ static struct mipi_dsi_platform_data mipi_dsi_pdata = {
 	.dsi_power_save = mipi_dsi_panel_power,
 };
 
-static struct mipi_dsi_panel_platform_data *mipi_monarudo_pdata;
+static struct mipi_dsi_panel_platform_data *mipi_deluxe_j_pdata;
 
-static struct dsi_buf monarudo_panel_tx_buf;
-static struct dsi_buf monarudo_panel_rx_buf;
+static struct dsi_buf deluxe_j_panel_tx_buf;
+static struct dsi_buf deluxe_j_panel_rx_buf;
 static struct dsi_cmd_desc *video_on_cmds = NULL;
 static struct dsi_cmd_desc *display_on_cmds = NULL;
 static struct dsi_cmd_desc *display_off_cmds = NULL;
@@ -882,8 +1116,8 @@ static uint32 mipi_renesas_manufacture_id(struct msm_fb_data_type *mfd)
 	struct dsi_cmd_desc *cmd;
 	uint32 *lp;
 
-	tp = &monarudo_panel_tx_buf;
-	rp = &monarudo_panel_rx_buf;
+	tp = &deluxe_j_panel_tx_buf;
+	rp = &deluxe_j_panel_rx_buf;
 	cmd = &renesas_manufacture_id_cmd;
 	mipi_dsi_cmds_rx(mfd, tp, rp, cmd, 3);
 	lp = (uint32 *)rp->data;
@@ -891,12 +1125,11 @@ static uint32 mipi_renesas_manufacture_id(struct msm_fb_data_type *mfd)
 	return *lp;
 }
 #endif
-
 static int resume_blk = 0;
 static struct i2c_client *blk_pwm_client;
 static struct dcs_cmd_req cmdreq;
 
-static int monarudo_lcd_on(struct platform_device *pdev)
+static int deluxe_j_lcd_on(struct platform_device *pdev)
 {
 	struct msm_fb_data_type *mfd;
 	struct mipi_panel_info *mipi;
@@ -908,11 +1141,12 @@ static int monarudo_lcd_on(struct platform_device *pdev)
 		return -EINVAL;
 
 	mipi  = &mfd->panel_info.mipi;
-	if(!first_init) {
+	if (!first_init) {
 		if (mipi->mode == DSI_VIDEO_MODE) {
-			mipi_dsi_cmds_tx(&monarudo_panel_tx_buf, video_on_cmds,
+			mipi_dsi_cmds_tx(&deluxe_j_panel_tx_buf, video_on_cmds,
 				video_on_cmds_count);
 		}
+
 	}
 	first_init = 0;
 	
@@ -920,7 +1154,7 @@ static int monarudo_lcd_on(struct platform_device *pdev)
 	return 0;
 }
 
-static int monarudo_lcd_off(struct platform_device *pdev)
+static int deluxe_j_lcd_off(struct platform_device *pdev)
 {
 	struct msm_fb_data_type *mfd;
 
@@ -934,10 +1168,10 @@ static int monarudo_lcd_off(struct platform_device *pdev)
 	resume_blk = 1;
 	return 0;
 }
-static int __devinit monarudo_lcd_probe(struct platform_device *pdev)
+static int __devinit deluxe_j_lcd_probe(struct platform_device *pdev)
 {
 	if (pdev->id == 0) {
-		mipi_monarudo_pdata = pdev->dev.platform_data;
+		mipi_deluxe_j_pdata = pdev->dev.platform_data;
 		return 0;
 	}
 
@@ -946,7 +1180,7 @@ static int __devinit monarudo_lcd_probe(struct platform_device *pdev)
 	PR_DISP_INFO("%s\n", __func__);
 	return 0;
 }
-static void monarudo_display_on(struct msm_fb_data_type *mfd)
+static void deluxe_j_display_on(struct msm_fb_data_type *mfd)
 {
 	
 	msleep(120);
@@ -954,8 +1188,6 @@ static void monarudo_display_on(struct msm_fb_data_type *mfd)
 	cmdreq.cmds = display_on_cmds;
 	cmdreq.cmds_cnt = 1;
 	cmdreq.flags = CMD_REQ_COMMIT;
-	if (mfd && mfd->panel_info.type == MIPI_CMD_PANEL)
-		cmdreq.flags |= CMD_CLK_CTRL;
 	cmdreq.rlen = 0;
 	cmdreq.cb = NULL;
 
@@ -964,13 +1196,11 @@ static void monarudo_display_on(struct msm_fb_data_type *mfd)
 	PR_DISP_INFO("%s\n", __func__);
 }
 
-static void monarudo_display_off(struct msm_fb_data_type *mfd)
+static void deluxe_j_display_off(struct msm_fb_data_type *mfd)
 {
 	cmdreq.cmds = display_off_cmds;
 	cmdreq.cmds_cnt = display_off_cmds_count;
 	cmdreq.flags = CMD_REQ_COMMIT;
-	if (mfd && mfd->panel_info.type == MIPI_CMD_PANEL)
-		cmdreq.flags |= CMD_CLK_CTRL;
 	cmdreq.rlen = 0;
 	cmdreq.cb = NULL;
 
@@ -987,7 +1217,7 @@ static void monarudo_display_off(struct msm_fb_data_type *mfd)
 #define BRI_SETTING_DEF                 142
 #define BRI_SETTING_MAX                 255
 
-static unsigned char monarudo_shrink_pwm(int val)
+static unsigned char deluxe_j_shrink_pwm(int val)
 {
 	unsigned char shrink_br = BRI_SETTING_MAX;
 
@@ -1009,22 +1239,21 @@ static unsigned char monarudo_shrink_pwm(int val)
 	return shrink_br;
 }
 
-static void monarudo_set_backlight(struct msm_fb_data_type *mfd)
+static void deluxe_j_set_backlight(struct msm_fb_data_type *mfd)
 {
 	int rc;
 
-	write_display_brightness[2] = monarudo_shrink_pwm((unsigned char)(mfd->bl_level));
+	if (mdp4_overlay_dsi_state_get() <= ST_DSI_SUSPEND) {
+		return;
+	}
+
+	write_display_brightness[2] = deluxe_j_shrink_pwm((unsigned char)(mfd->bl_level));
 
 	if (resume_blk) {
 		resume_blk = 0;
 
-		if (system_rev == XB) {
-			gpio_tlmm_config(GPIO_CFG(MBAT_IN_XA_XB, 0, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA), GPIO_CFG_ENABLE);
-			gpio_set_value(MBAT_IN_XA_XB, 1);
-		} else if (system_rev >= XC) {
-			gpio_tlmm_config(GPIO_CFG(BL_HW_EN_XC_XD, 0, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA), GPIO_CFG_ENABLE);
-			gpio_set_value(BL_HW_EN_XC_XD, 1);
-		}
+		gpio_tlmm_config(GPIO_CFG(BL_HW_EN, 0, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA), GPIO_CFG_ENABLE);
+		gpio_set_value(BL_HW_EN, 1);
 
 		rc = i2c_smbus_write_byte_data(blk_pwm_client, 0x10, 0xC5);
 		if (rc)
@@ -1046,22 +1275,14 @@ static void monarudo_set_backlight(struct msm_fb_data_type *mfd)
 	cmdreq.cmds = (struct dsi_cmd_desc*)&renesas_cmd_backlight_cmds;
 	cmdreq.cmds_cnt = 1;
 	cmdreq.flags = CMD_REQ_COMMIT;
-	if (mfd && mfd->panel_info.type == MIPI_CMD_PANEL)
-		cmdreq.flags |= CMD_CLK_CTRL;
 	cmdreq.rlen = 0;
 	cmdreq.cb = NULL;
 
 	mipi_dsi_cmdlist_put(&cmdreq);
 
-	if((mfd->bl_level) == 0) {
-		if (system_rev == XB) {
-			gpio_tlmm_config(GPIO_CFG(MBAT_IN_XA_XB, 0, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA), GPIO_CFG_ENABLE);
-			gpio_set_value(MBAT_IN_XA_XB, 0);
-		} else if (system_rev >= XC) {
-			gpio_tlmm_config(GPIO_CFG(BL_HW_EN_XC_XD, 0, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA), GPIO_CFG_ENABLE);
-			gpio_set_value(BL_HW_EN_XC_XD, 0);
-		}
-
+	if ((mfd->bl_level) == 0) {
+		gpio_tlmm_config(GPIO_CFG(BL_HW_EN, 0, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA), GPIO_CFG_ENABLE);
+		gpio_set_value(BL_HW_EN, 0);
 		resume_blk = 1;
 	}
 
@@ -1069,24 +1290,24 @@ static void monarudo_set_backlight(struct msm_fb_data_type *mfd)
 }
 
 static struct platform_driver this_driver = {
-	.probe  = monarudo_lcd_probe,
+	.probe  = deluxe_j_lcd_probe,
 	.driver = {
-		.name   = "mipi_monarudo",
+		.name   = "mipi_deluxe_j",
 	},
 };
 
-static struct msm_fb_panel_data monarudo_panel_data = {
-	.on	= monarudo_lcd_on,
-	.off	= monarudo_lcd_off,
-	.set_backlight = monarudo_set_backlight,
-	.display_on = monarudo_display_on,
-	.display_off = monarudo_display_off,
+static struct msm_fb_panel_data deluxe_j_panel_data = {
+	.on	= deluxe_j_lcd_on,
+	.off	= deluxe_j_lcd_off,
+	.set_backlight = deluxe_j_set_backlight,
+	.display_on = deluxe_j_display_on,
+	.display_off = deluxe_j_display_off,
 };
 
 static struct msm_panel_info pinfo;
 static int ch_used[3] = {0};
 
-static int mipi_monarudo_device_register(struct msm_panel_info *pinfo,
+static int mipi_deluxe_j_device_register(struct msm_panel_info *pinfo,
 					u32 channel, u32 panel)
 {
 	struct platform_device *pdev = NULL;
@@ -1097,14 +1318,14 @@ static int mipi_monarudo_device_register(struct msm_panel_info *pinfo,
 
 	ch_used[channel] = TRUE;
 
-	pdev = platform_device_alloc("mipi_monarudo", (panel << 8)|channel);
+	pdev = platform_device_alloc("mipi_deluxe_j", (panel << 8)|channel);
 	if (!pdev)
 		return -ENOMEM;
 
-	monarudo_panel_data.panel_info = *pinfo;
+	deluxe_j_panel_data.panel_info = *pinfo;
 
-	ret = platform_device_add_data(pdev, &monarudo_panel_data,
-		sizeof(monarudo_panel_data));
+	ret = platform_device_add_data(pdev, &deluxe_j_panel_data,
+		sizeof(deluxe_j_panel_data));
 	if (ret) {
 		pr_err("%s: platform_device_add_data failed!\n", __func__);
 		goto err_device_put;
@@ -1127,8 +1348,8 @@ static struct mipi_dsi_phy_ctrl dsi_video_mode_phy_db = {
 	
 	{0x03, 0x08, 0x05, 0x00, 0x20},
 	
-	{0xDB, 0x35, 0x24, 0x00, 0x65, 0x68, 0x29,
-	0x38, 0x3D, 0x3, 0x4, 0xA0},
+	{0xDD, 0x51, 0x27, 0x00, 0x6E, 0x74, 0x2C,
+	0x55, 0x3E, 0x3, 0x4, 0xA0},
 	
 	{0x5F, 0x00, 0x00, 0x10},
 	
@@ -1152,7 +1373,7 @@ static int __init mipi_video_sharp_init(void)
 	pinfo.height = 110;
 	pinfo.camera_backlight = 176;
 
-	pinfo.lcdc.h_back_porch = 50;
+	pinfo.lcdc.h_back_porch = 58;
 	pinfo.lcdc.h_front_porch = 100;
 	pinfo.lcdc.h_pulse_width = 10;
 	pinfo.lcdc.v_back_porch = 4;
@@ -1164,12 +1385,12 @@ static int __init mipi_video_sharp_init(void)
 	pinfo.lcd.v_pulse_width = 2;
 
 	pinfo.lcdc.border_clr = 0;	
-	pinfo.lcdc.underflow_clr = 0x0;	
+	pinfo.lcdc.underflow_clr = 0;	
 	pinfo.lcdc.hsync_skew = 0;
 	pinfo.bl_max = 255;
 	pinfo.bl_min = 1;
 	pinfo.fb_num = 2;
-	pinfo.clk_rate = 848000000;
+	pinfo.clk_rate = 860000000;
 
 	pinfo.mipi.mode = DSI_VIDEO_MODE;
 	pinfo.mipi.pulse_mode_hsa_he = TRUE;
@@ -1188,16 +1409,15 @@ static int __init mipi_video_sharp_init(void)
 	pinfo.mipi.data_lane3 = TRUE;
 
 	pinfo.mipi.tx_eot_append = TRUE;
-	pinfo.mipi.t_clk_post = 0x02;
-	pinfo.mipi.t_clk_pre = 0x2C;
+	pinfo.mipi.t_clk_post = 0x05;
+	pinfo.mipi.t_clk_pre = 0x2D;
 	pinfo.mipi.stream = 0; 
 	pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_SW;
 	pinfo.mipi.dma_trigger = DSI_CMD_TRIGGER_SW;
 	pinfo.mipi.frame_rate = 60;
 	pinfo.mipi.dsi_phy_db = &dsi_video_mode_phy_db;
-	pinfo.mipi.esc_byte_ratio = 6;
 
-	ret = mipi_monarudo_device_register(&pinfo, MIPI_DSI_PRIM,
+	ret = mipi_deluxe_j_device_register(&pinfo, MIPI_DSI_PRIM,
 						MIPI_DSI_PANEL_FWVGA_PT);
 	if (ret)
 		pr_err("%s: failed to register device!\n", __func__);
@@ -1208,6 +1428,9 @@ static int __init mipi_video_sharp_init(void)
 	display_on_cmds_count = ARRAY_SIZE(renesas_display_on_cmds);
 	display_off_cmds = sharp_display_off_cmds;
 	display_off_cmds_count = ARRAY_SIZE(sharp_display_off_cmds);
+
+	mdp_gamma = mdp_gamma_sharp;
+	mdp_gamma_count = ARRAY_SIZE(mdp_gamma_sharp);
 
 	return ret;
 }
@@ -1226,7 +1449,7 @@ static int __init mipi_video_sony_init(void)
 	pinfo.height = 110;
 	pinfo.camera_backlight = 176;
 
-	pinfo.lcdc.h_back_porch = 50;
+	pinfo.lcdc.h_back_porch = 58;
 	pinfo.lcdc.h_front_porch = 100;
 	pinfo.lcdc.h_pulse_width = 10;
 	pinfo.lcdc.v_back_porch = 3;
@@ -1243,7 +1466,7 @@ static int __init mipi_video_sony_init(void)
 	pinfo.bl_max = 255;
 	pinfo.bl_min = 1;
 	pinfo.fb_num = 2;
-	pinfo.clk_rate = 848000000;
+	pinfo.clk_rate = 860000000;
 
 	pinfo.mipi.mode = DSI_VIDEO_MODE;
 	pinfo.mipi.pulse_mode_hsa_he = TRUE;
@@ -1262,15 +1485,15 @@ static int __init mipi_video_sony_init(void)
 	pinfo.mipi.data_lane3 = TRUE;
 
 	pinfo.mipi.tx_eot_append = TRUE;
-	pinfo.mipi.t_clk_post = 0x02;
-	pinfo.mipi.t_clk_pre = 0x2C;
+	pinfo.mipi.t_clk_post = 0x05;
+	pinfo.mipi.t_clk_pre = 0x2D;
 	pinfo.mipi.stream = 0; 
 	pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_SW;
 	pinfo.mipi.dma_trigger = DSI_CMD_TRIGGER_SW;
 	pinfo.mipi.frame_rate = 60;
 	pinfo.mipi.dsi_phy_db = &dsi_video_mode_phy_db;
 
-	ret = mipi_monarudo_device_register(&pinfo, MIPI_DSI_PRIM,
+	ret = mipi_deluxe_j_device_register(&pinfo, MIPI_DSI_PRIM,
 						MIPI_DSI_PANEL_FWVGA_PT);
 	if (ret)
 		pr_err("%s: failed to register device!\n", __func__);
@@ -1281,6 +1504,9 @@ static int __init mipi_video_sony_init(void)
 	display_on_cmds_count = ARRAY_SIZE(renesas_display_on_cmds);
 	display_off_cmds = sony_display_off_cmds;
 	display_off_cmds_count = ARRAY_SIZE(sony_display_off_cmds);
+
+	mdp_gamma = mdp_gamma_sony;
+	mdp_gamma_count = ARRAY_SIZE(mdp_gamma_sony);
 
 	return ret;
 }
@@ -1318,26 +1544,22 @@ static void __exit pwm_i2c_remove(void)
 	i2c_del_driver(&pwm_i2c_driver);
 }
 
-void __init monarudo_init_fb(void)
+void __init deluxe_j_init_fb(void)
 {
 
 	platform_device_register(&msm_fb_device);
 
 	if(panel_type != PANEL_ID_NONE) {
 		if ((board_mfg_mode() == 4) || (board_mfg_mode() == 5))
-			mdp_pdata.cont_splash_enabled = 0x0;
+			 mdp_pdata.cont_splash_enabled = 0x0;
 		msm_fb_register_device("mdp", &mdp_pdata);
 		msm_fb_register_device("mipi_dsi", &mipi_dsi_pdata);
 		wa_xo = msm_xo_get(MSM_XO_TCXO_D0, "mipi");
 	}
 	msm_fb_register_device("dtv", &dtv_pdata);
-#ifdef CONFIG_FB_MSM_WRITEBACK_MSM_PANEL
-  platform_device_register(&wfd_panel_device);
-  platform_device_register(&wfd_device);
-#endif
 }
 
-static int __init monarudo_panel_init(void)
+static int __init deluxe_j_panel_init(void)
 {
 	int ret;
 
@@ -1351,15 +1573,15 @@ static int __init monarudo_panel_init(void)
 	if (ret)
 		pr_err(KERN_ERR "%s: failed to add i2c driver\n", __func__);
 
-	mipi_dsi_buf_alloc(&monarudo_panel_tx_buf, DSI_BUF_SIZE);
-	mipi_dsi_buf_alloc(&monarudo_panel_rx_buf, DSI_BUF_SIZE);
+	mipi_dsi_buf_alloc(&deluxe_j_panel_tx_buf, DSI_BUF_SIZE);
+	mipi_dsi_buf_alloc(&deluxe_j_panel_rx_buf, DSI_BUF_SIZE);
 
-	if (panel_type == PANEL_ID_DLX_SHARP_RENESAS) {
+	if (panel_type == PANEL_ID_DLXJ_SHARP_RENESAS) {
 		mipi_video_sharp_init();
-		PR_DISP_INFO("%s panel ID = PANEL_ID_DLX_SHARP_RENESAS\n", __func__);
-	} else if (panel_type == PANEL_ID_DLX_SONY_RENESAS) {
+		PR_DISP_INFO("%s panel ID = PANEL_ID_DLXJ_SHARP_RENESAS\n", __func__);
+	} else if (panel_type == PANEL_ID_DLXJ_SONY_RENESAS) {
 		mipi_video_sony_init();
-		PR_DISP_INFO("%s panel ID = PANEL_ID_DLX_SONY_RENESAS\n", __func__);
+		PR_DISP_INFO("%s panel ID = PANEL_ID_DLXJ_SONY_RENESAS\n", __func__);
 	} else {
 		PR_DISP_ERR("%s: panel not supported!!\n", __func__);
 		return -ENODEV;
@@ -1369,4 +1591,4 @@ static int __init monarudo_panel_init(void)
 
 	return platform_driver_register(&this_driver);
 }
-device_initcall_sync(monarudo_panel_init);
+device_initcall_sync(deluxe_j_panel_init);
