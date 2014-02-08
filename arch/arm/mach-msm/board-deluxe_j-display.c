@@ -98,9 +98,17 @@ static int deluxe_j_detect_panel(const char *name)
 
 	return -ENODEV;
 }
-
+#ifdef CONFIG_UPDATE_LCDC_LUT
+int update_preset_lcdc_lut(void)
+{
+  return 0;
+}
+#endif
 static struct msm_fb_platform_data msm_fb_pdata = {
 	.detect_client = deluxe_j_detect_panel,
+#ifdef CONFIG_UPDATE_LCDC_LUT
+  .update_lcdc_lut = update_preset_lcdc_lut,
+#endif
 };
 
 static struct platform_device msm_fb_device = {
@@ -248,12 +256,6 @@ static struct lcdc_platform_data dtv_pdata = {
 };
 #endif
 
-static int mdp_core_clk_rate_table[] = {
-	200000000,
-	200000000,
-	200000000,
-	200000000,
-};
 struct mdp_reg *mdp_gamma = NULL;
 int mdp_gamma_count = 0;
 
@@ -787,9 +789,6 @@ int deluxe_j_mdp_gamma(void)
 
 static struct msm_panel_common_pdata mdp_pdata = {
 	.gpio = MDP_VSYNC_GPIO,
-	.mdp_core_clk_rate = 200000000,
-	.mdp_core_clk_table = mdp_core_clk_rate_table,
-	.num_mdp_clk = ARRAY_SIZE(mdp_core_clk_rate_table),
 #ifdef CONFIG_MSM_BUS_SCALING
 	.mdp_bus_scale_table = &mdp_bus_scale_pdata,
 #endif
@@ -827,6 +826,7 @@ static struct platform_device wfd_device = {
     .dev.platform_data = &wfd_pdata,
 };
 #endif
+
 void __init deluxe_j_mdp_writeback(struct memtype_reserve* reserve_table)
 {
 	mdp_pdata.ov0_wb_size = MSM_FB_OVERLAY0_WRITEBACK_SIZE;
@@ -839,9 +839,12 @@ void __init deluxe_j_mdp_writeback(struct memtype_reserve* reserve_table)
 #endif
 }
 static int first_init = 1;
-static bool dsi_power_on;
+uint32_t cfg_panel_te_active[] = {GPIO_CFG(LCD_TE, 1, GPIO_CFG_INPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA)};
+uint32_t cfg_panel_te_sleep[] = {GPIO_CFG(LCD_TE, 0, GPIO_CFG_INPUT, GPIO_CFG_PULL_DOWN, GPIO_CFG_2MA)};
+
 static int mipi_dsi_panel_power(int on)
 {
+        static bool dsi_power_on = false;
 	static struct regulator *reg_lvs5, *reg_l2;
 	static int gpio36, gpio37;
 	int rc;
@@ -1189,6 +1192,8 @@ static void deluxe_j_display_on(struct msm_fb_data_type *mfd)
 	cmdreq.cmds = display_on_cmds;
 	cmdreq.cmds_cnt = 1;
 	cmdreq.flags = CMD_REQ_COMMIT;
+	if (mfd && mfd->panel_info.type == MIPI_CMD_PANEL)
+		cmdreq.flags |= CMD_CLK_CTRL;
 	cmdreq.rlen = 0;
 	cmdreq.cb = NULL;
 
@@ -1202,6 +1207,8 @@ static void deluxe_j_display_off(struct msm_fb_data_type *mfd)
 	cmdreq.cmds = display_off_cmds;
 	cmdreq.cmds_cnt = display_off_cmds_count;
 	cmdreq.flags = CMD_REQ_COMMIT;
+	if (mfd && mfd->panel_info.type == MIPI_CMD_PANEL)
+		cmdreq.flags |= CMD_CLK_CTRL;
 	cmdreq.rlen = 0;
 	cmdreq.cb = NULL;
 
@@ -1244,9 +1251,6 @@ static void deluxe_j_set_backlight(struct msm_fb_data_type *mfd)
 {
 	int rc;
 
-	if (mdp4_overlay_dsi_state_get() <= ST_DSI_SUSPEND) {
-		return;
-	}
 
 	write_display_brightness[2] = deluxe_j_shrink_pwm((unsigned char)(mfd->bl_level));
 
@@ -1276,6 +1280,8 @@ static void deluxe_j_set_backlight(struct msm_fb_data_type *mfd)
 	cmdreq.cmds = (struct dsi_cmd_desc*)&renesas_cmd_backlight_cmds;
 	cmdreq.cmds_cnt = 1;
 	cmdreq.flags = CMD_REQ_COMMIT;
+	if (mfd && mfd->panel_info.type == MIPI_CMD_PANEL)
+		cmdreq.flags |= CMD_CLK_CTRL;
 	cmdreq.rlen = 0;
 	cmdreq.cb = NULL;
 
