@@ -13,7 +13,7 @@
 
 #include <linux/regulator/pm8xxx-regulator.h>
 
-#include "board-monarudo.h"
+#include "board-deluxe_ub1.h"
 
 #define VREG_CONSUMERS(_id) \
 	static struct regulator_consumer_supply vreg_consumers_##_id[]

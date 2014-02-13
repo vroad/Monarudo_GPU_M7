@@ -28,7 +28,7 @@
 #include <mach/gpiomux.h>
 #include <mach/restart.h>
 #include "devices.h"
-#include "board-monarudo.h"
+#include "board-deluxe_ub1.h"
 
 void monarudo_pm8xxx_adc_device_register(void);
 

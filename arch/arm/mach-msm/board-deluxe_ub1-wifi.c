@@ -10,8 +10,8 @@
 #include <linux/wifi_tiwlan.h>
 #include <mach/msm_bus_board.h>
 
-#include "board-monarudo.h"
-#include "board-monarudo-wifi.h"
+#include "board-deluxe_ub1.h"
+#include "board-deluxe_ub1-wifi.h"
 
 int monarudo_wifi_power(int on);
 int monarudo_wifi_reset(int on);
