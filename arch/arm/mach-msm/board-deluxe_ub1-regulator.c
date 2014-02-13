@@ -23,9 +23,9 @@ VREG_CONSUMERS(L1) = {
 };
 VREG_CONSUMERS(L2) = {
 	REGULATOR_SUPPLY("8921_l2",		NULL),
-    REGULATOR_SUPPLY("mipi_csi_vdd",	"msm_csiphy.0"),
-    REGULATOR_SUPPLY("mipi_csi_vdd",	"msm_csiphy.1"),
-    REGULATOR_SUPPLY("mipi_csi_vdd",    "msm_csiphy.2"),
+	REGULATOR_SUPPLY("mipi_csi_vdd",	"msm_csiphy.0"),
+	REGULATOR_SUPPLY("mipi_csi_vdd",	"msm_csiphy.1"),
+	REGULATOR_SUPPLY("mipi_csi_vdd",	"msm_csiphy.2"),
 	REGULATOR_SUPPLY("lvds_pll_vdda",	"lvds.0"),
 	REGULATOR_SUPPLY("dsi1_pll_vdda",	"mipi_dsi.1"),
 };
@@ -66,7 +66,6 @@ VREG_CONSUMERS(L9) = {
 VREG_CONSUMERS(L10) = {
 	REGULATOR_SUPPLY("8921_l10",		NULL),
 	REGULATOR_SUPPLY("iris_vddpa",		"wcnss_wlan.0"),
-	REGULATOR_SUPPLY("cir_3v",		NULL),
 };
 VREG_CONSUMERS(L11) = {
 	REGULATOR_SUPPLY("8921_l11",		NULL),
@@ -90,9 +89,6 @@ VREG_CONSUMERS(L16) = {
 };
 VREG_CONSUMERS(L17) = {
 	REGULATOR_SUPPLY("8921_l17",		NULL),
-	REGULATOR_SUPPLY("8921_l17_g_sensor",	NULL),
-	REGULATOR_SUPPLY("8921_l17_compass",	NULL),
-	REGULATOR_SUPPLY("8921_l17_gyro",	NULL),
 };
 VREG_CONSUMERS(L18) = {
 	REGULATOR_SUPPLY("8921_l18",		NULL),
@@ -232,6 +228,7 @@ VREG_CONSUMERS(EXT_5V) = {
 VREG_CONSUMERS(EXT_MPP8) = {
 	REGULATOR_SUPPLY("ext_mpp8",		NULL),
 };
+#if 0
 VREG_CONSUMERS(EXT_3P3V) = {
 	REGULATOR_SUPPLY("ext_3p3v",		NULL),
 	REGULATOR_SUPPLY("vdd_io",		"spi0.2"),
@@ -239,6 +236,7 @@ VREG_CONSUMERS(EXT_3P3V) = {
 	REGULATOR_SUPPLY("lvds_vccs_3p3v",      "lvds.0"),
 	REGULATOR_SUPPLY("dsi1_vccs_3p3v",      "mipi_dsi.1"),
 };
+#endif
 #if 0 
 VREG_CONSUMERS(EXT_TS_SW) = {
 	REGULATOR_SUPPLY("ext_ts_sw",		NULL),
@@ -465,32 +463,31 @@ VREG_CONSUMERS(EXT_TS_SW) = {
 	}
 
 struct gpio_regulator_platform_data
-monarudo_gpio_regulator_pdata[] __devinitdata = {
+deluxe_ub1_gpio_regulator_pdata[] __devinitdata = {
 	
-	GPIO_VREG(EXT_5V, "ext_5v", "ext_5v_en",
-			PM8921_MPP_PM_TO_SYS(7), NULL),
-	GPIO_VREG(EXT_3P3V, "ext_3p3v", "ext_3p3v_en",
-			monarudo_EXT_3P3V_REG_EN_GPIO, NULL),
+	GPIO_VREG(EXT_5V, "ext_5v", "ext_5v_en", PM8921_MPP_PM_TO_SYS(7), NULL),
+	
+	
 	
 	
 	GPIO_VREG(EXT_MPP8, "ext_mpp8", "ext_mpp8_en",
 			PM8921_MPP_PM_TO_SYS(8), NULL),
 };
 
-struct regulator_init_data monarudo_saw_regulator_pdata_8921_s5 =
+struct regulator_init_data deluxe_ub1_saw_regulator_pdata_8921_s5 =
 	
 	SAW_VREG_INIT(S5, "8921_s5",	       850000, 1300000);
-struct regulator_init_data monarudo_saw_regulator_pdata_8921_s6 =
+struct regulator_init_data deluxe_ub1_saw_regulator_pdata_8921_s6 =
 	SAW_VREG_INIT(S6, "8921_s6",	       850000, 1300000);
 
-struct regulator_init_data monarudo_saw_regulator_pdata_8821_s0 =
+struct regulator_init_data deluxe_ub1_saw_regulator_pdata_8821_s0 =
 	
 	SAW_VREG_INIT(8821_S0, "8821_s0",       850000, 1300000);
-struct regulator_init_data monarudo_saw_regulator_pdata_8821_s1 =
+struct regulator_init_data deluxe_ub1_saw_regulator_pdata_8821_s1 =
 	SAW_VREG_INIT(8821_S1, "8821_s1",       850000, 1300000);
 
 struct pm8xxx_regulator_platform_data
-monarudo_pm8921_regulator_pdata[] __devinitdata = {
+deluxe_ub1_pm8921_regulator_pdata[] __devinitdata = {
 	PM8XXX_NLDO1200(L26, "8921_l26", 0, 1, 375000, 1050000, 200, "8921_s7",
 		0, 1),
 
@@ -500,7 +497,7 @@ monarudo_pm8921_regulator_pdata[] __devinitdata = {
 };
 
 static struct rpm_regulator_init_data
-monarudo_rpm_regulator_init_data[] __devinitdata = {
+deluxe_ub1_rpm_regulator_init_data[] __devinitdata = {
 	
 	RPM_SMPS(S1, 1, 1, 0, 1225000, 1225000, NULL, 100000, 3p20, NONE, NONE),
 	RPM_SMPS(S2, 0, 0, 0, 1300000, 1300000, NULL,      0, 1p60, NONE, NONE),
@@ -516,7 +513,7 @@ monarudo_rpm_regulator_init_data[] __devinitdata = {
 	RPM_LDO(L4,  1, 1, 0, 1800000, 1800000, NULL,          0, 10000),
 	RPM_LDO(L5,  0, 1, 0, 2950000, 2950000, NULL,          0,     0),
 	RPM_LDO(L6,  0, 1, 0, 2950000, 2950000, NULL,          0,     0),
-	RPM_LDO(L7,  0, 1, 0, 1800000, 1800000, NULL,          0,     0),
+	RPM_LDO(L7,  0, 1, 0, 1850000, 2950000, NULL,          0,     0),
 	RPM_LDO(L8,  0, 1, 0, 2800000, 2800000, NULL,          0,     0),
 	RPM_LDO(L9,  0, 1, 0, 2800000, 2800000, NULL,          0,     0),
 	RPM_LDO(L10, 0, 1, 0, 2900000, 2900000, NULL,          0,     0),
@@ -524,8 +521,8 @@ monarudo_rpm_regulator_init_data[] __devinitdata = {
 	RPM_LDO(L12, 0, 1, 0, 1200000, 1200000, "8921_s4",     0,     0),
 	RPM_LDO(L14, 0, 1, 0, 1800000, 1800000, NULL,          0,     0),
 	RPM_LDO(L15, 0, 1, 0, 1800000, 2950000, NULL,          0,     0),
-	RPM_LDO(L16, 0, 1, 0, 2800000, 2800000, NULL,          0,     0),
-	RPM_LDO(L17, 0, 1, 0, 2850000, 2850000, NULL,          0,     0),
+	RPM_LDO(L16, 0, 1, 0, 3300000, 3300000, NULL,          0,     0),
+	RPM_LDO(L17, 0, 1, 0, 2000000, 2000000, NULL,          0,     0),
 	RPM_LDO(L18, 0, 1, 0, 1300000, 1800000, "8921_s4",     0,     0),
 	RPM_LDO(L21, 0, 1, 0, 1050000, 1050000, NULL,          0,     0),
 	RPM_LDO(L22, 0, 1, 0, 2600000, 2600000, NULL,          0,     0),
@@ -549,42 +546,40 @@ monarudo_rpm_regulator_init_data[] __devinitdata = {
 	RPM_NCP(NCP, 0,    0, 1800000, 1800000, "8921_l6", 1p60),
 };
 
-
 #define RPM_REG_MAP(_id, _sleep_also, _voter, _supply, _dev_name) \
-  { \
-    .vreg_id = RPM_VREG_ID_PM8921_##_id, \
-    .sleep_also = _sleep_also, \
-    .voter = _voter, \
-    .supply = _supply, \
-    .dev_name = _dev_name, \
-  }
+	{ \
+		.vreg_id = RPM_VREG_ID_PM8921_##_id, \
+		.sleep_also = _sleep_also, \
+		.voter = _voter, \
+		.supply = _supply, \
+		.dev_name = _dev_name, \
+	}
 static struct rpm_regulator_consumer_mapping
-        msm_rpm_regulator_consumer_mapping[] __devinitdata = {
-  RPM_REG_MAP(LVS7, 0, 1, "krait0_hfpll", "acpuclk-8064"),
-  RPM_REG_MAP(LVS7, 0, 2, "krait1_hfpll", "acpuclk-8064"),
-  RPM_REG_MAP(LVS7, 0, 4, "krait2_hfpll", "acpuclk-8064"),
-  RPM_REG_MAP(LVS7, 0, 5, "krait3_hfpll", "acpuclk-8064"),
-  RPM_REG_MAP(LVS7, 0, 6, "l2_hfpll",     "acpuclk-8064"),
-  RPM_REG_MAP(L24,  0, 1, "krait0_mem",   "acpuclk-8064"),
-  RPM_REG_MAP(L24,  0, 2, "krait1_mem",   "acpuclk-8064"),
-  RPM_REG_MAP(L24,  0, 4, "krait2_mem",   "acpuclk-8064"),
-  RPM_REG_MAP(L24,  0, 5, "krait3_mem",   "acpuclk-8064"),
-  RPM_REG_MAP(S3,   0, 1, "krait0_dig",   "acpuclk-8064"),
-  RPM_REG_MAP(S3,   0, 2, "krait1_dig",   "acpuclk-8064"),
-  RPM_REG_MAP(S3,   0, 4, "krait2_dig",   "acpuclk-8064"),
-  RPM_REG_MAP(S3,   0, 5, "krait3_dig",   "acpuclk-8064"),
+	      msm_rpm_regulator_consumer_mapping[] __devinitdata = {
+	RPM_REG_MAP(LVS7, 0, 1, "krait0_hfpll", "acpuclk-8064"),
+	RPM_REG_MAP(LVS7, 0, 2, "krait1_hfpll", "acpuclk-8064"),
+	RPM_REG_MAP(LVS7, 0, 4, "krait2_hfpll", "acpuclk-8064"),
+	RPM_REG_MAP(LVS7, 0, 5, "krait3_hfpll", "acpuclk-8064"),
+	RPM_REG_MAP(LVS7, 0, 6, "l2_hfpll",     "acpuclk-8064"),
+	RPM_REG_MAP(L24,  0, 1, "krait0_mem",   "acpuclk-8064"),
+	RPM_REG_MAP(L24,  0, 2, "krait1_mem",   "acpuclk-8064"),
+	RPM_REG_MAP(L24,  0, 4, "krait2_mem",   "acpuclk-8064"),
+	RPM_REG_MAP(L24,  0, 5, "krait3_mem",   "acpuclk-8064"),
+	RPM_REG_MAP(S3,   0, 1, "krait0_dig",   "acpuclk-8064"),
+	RPM_REG_MAP(S3,   0, 2, "krait1_dig",   "acpuclk-8064"),
+	RPM_REG_MAP(S3,   0, 4, "krait2_dig",   "acpuclk-8064"),
+	RPM_REG_MAP(S3,   0, 5, "krait3_dig",   "acpuclk-8064"),
 };
 
-int monarudo_pm8921_regulator_pdata_len __devinitdata =
-	ARRAY_SIZE(monarudo_pm8921_regulator_pdata);
+int deluxe_ub1_pm8921_regulator_pdata_len __devinitdata =
+	ARRAY_SIZE(deluxe_ub1_pm8921_regulator_pdata);
 
-struct rpm_regulator_platform_data monarudo_rpm_regulator_pdata __devinitdata = {
-	.init_data		  = monarudo_rpm_regulator_init_data,
-	.num_regulators		  = ARRAY_SIZE(monarudo_rpm_regulator_init_data),
-	.version		  = RPM_VREG_VERSION_8960,
-	.vreg_id_vdd_mem	  = RPM_VREG_ID_PM8921_L24,
-	.vreg_id_vdd_dig	  = RPM_VREG_ID_PM8921_S3,
-        .consumer_map      = msm_rpm_regulator_consumer_mapping,
-        .consumer_map_len = ARRAY_SIZE(msm_rpm_regulator_consumer_mapping),
-	.requires_tcxo_workaround = true
+struct rpm_regulator_platform_data deluxe_ub1_rpm_regulator_pdata __devinitdata = {
+	.init_data		= deluxe_ub1_rpm_regulator_init_data,
+	.num_regulators		= ARRAY_SIZE(deluxe_ub1_rpm_regulator_init_data),
+	.version		= RPM_VREG_VERSION_8960,
+	.vreg_id_vdd_mem	= RPM_VREG_ID_PM8921_L24,
+	.vreg_id_vdd_dig	= RPM_VREG_ID_PM8921_S3,
+	.consumer_map		  = msm_rpm_regulator_consumer_mapping,
+	.consumer_map_len = ARRAY_SIZE(msm_rpm_regulator_consumer_mapping),
 };

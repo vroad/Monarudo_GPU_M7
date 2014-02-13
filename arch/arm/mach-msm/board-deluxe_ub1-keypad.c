@@ -1,4 +1,4 @@
-/* arch/arm/mach-msm/board-fighter-keypad.c
+/* arch/arm/mach-msm/board-deluxe_ub1-keypad.c
  * Copyright (C) 2010 HTC Corporation.
  *
  * This software is licensed under the terms of the GNU General Public
@@ -24,97 +24,60 @@
 #include "board-deluxe_ub1.h"
 
 #undef MODULE_PARAM_PREFIX
-#define MODULE_PARAM_PREFIX "board_monarudo."
+#define MODULE_PARAM_PREFIX "board_deluxe_ub1."
 
 
-static struct gpio_event_direct_entry monarudo_keypad_map_xc[] = {
+static struct gpio_event_direct_entry deluxe_ub1_keypad_map[] = {
 	{
 		.gpio = PWR_KEY_MSMz,
 		.code = KEY_POWER,
 	},
 	{
-		.gpio = VOL_DOWNz_XC,
+		.gpio = VOL_DOWNz,
 		.code = KEY_VOLUMEDOWN,
 	},
 	{
-		.gpio = VOL_UPz_XC,
+		.gpio = VOL_UPz,
 		.code = KEY_VOLUMEUP,
 	},
-};
-
-static struct gpio_event_direct_entry monarudo_keypad_map[] = {
-	{
-		.gpio = PWR_KEY_MSMz,
-		.code = KEY_POWER,
-	},
-	{
-		.gpio = VOL_DOWNz_XA_XB,
-		.code = KEY_VOLUMEDOWN,
-	},
-	{
-		.gpio = VOL_UPz_XA_XB,
-		.code = KEY_VOLUMEUP,
-	},
-};
-
-static uint32_t matirx_inputs_gpio_table_xc[] = {
-	GPIO_CFG(PWR_KEY_MSMz, 0, GPIO_CFG_INPUT, GPIO_CFG_PULL_UP,
-		 GPIO_CFG_2MA),
-	GPIO_CFG(VOL_DOWNz_XC, 0, GPIO_CFG_INPUT, GPIO_CFG_PULL_UP,
-		 GPIO_CFG_2MA),
-	GPIO_CFG(VOL_UPz_XC, 0, GPIO_CFG_INPUT, GPIO_CFG_PULL_UP,
-		 GPIO_CFG_2MA),
 };
 
 static uint32_t matirx_inputs_gpio_table[] = {
 	GPIO_CFG(PWR_KEY_MSMz, 0, GPIO_CFG_INPUT, GPIO_CFG_PULL_UP,
 		 GPIO_CFG_2MA),
-	GPIO_CFG(VOL_DOWNz_XA_XB, 0, GPIO_CFG_INPUT, GPIO_CFG_PULL_UP,
+	GPIO_CFG(VOL_DOWNz, 0, GPIO_CFG_INPUT, GPIO_CFG_PULL_UP,
 		 GPIO_CFG_2MA),
-	GPIO_CFG(VOL_UPz_XA_XB, 0, GPIO_CFG_INPUT, GPIO_CFG_PULL_UP,
+	GPIO_CFG(VOL_UPz, 0, GPIO_CFG_INPUT, GPIO_CFG_PULL_UP,
 		 GPIO_CFG_2MA),
 };
 
-static void monarudo_direct_inputs_gpio(void)
+static void deluxe_ub1_direct_inputs_gpio(void)
 {
-
-	if (system_rev >= 2) {
-		gpio_tlmm_config(matirx_inputs_gpio_table_xc[0], GPIO_CFG_ENABLE);
-		gpio_tlmm_config(matirx_inputs_gpio_table_xc[1], GPIO_CFG_ENABLE);
-		gpio_tlmm_config(matirx_inputs_gpio_table_xc[2], GPIO_CFG_ENABLE);
-	} else {
-		gpio_tlmm_config(matirx_inputs_gpio_table[0], GPIO_CFG_ENABLE);
-		gpio_tlmm_config(matirx_inputs_gpio_table[1], GPIO_CFG_ENABLE);
-		gpio_tlmm_config(matirx_inputs_gpio_table[2], GPIO_CFG_ENABLE);
-	}
+	gpio_tlmm_config(matirx_inputs_gpio_table[0], GPIO_CFG_ENABLE);
+	gpio_tlmm_config(matirx_inputs_gpio_table[1], GPIO_CFG_ENABLE);
+	gpio_tlmm_config(matirx_inputs_gpio_table[2], GPIO_CFG_ENABLE);
 
 	return;
 }
 
 uint32_t hw_clr_gpio_table[] = {
-	GPIO_CFG(RESET_EN_CLRz_XC, 0, GPIO_CFG_INPUT,
+	GPIO_CFG(RESET_EN_CLRz, 0, GPIO_CFG_INPUT,
 		GPIO_CFG_PULL_UP, GPIO_CFG_2MA),
-	GPIO_CFG(RESET_EN_CLRz_XC, 0, GPIO_CFG_OUTPUT,
+	GPIO_CFG(RESET_EN_CLRz, 0, GPIO_CFG_OUTPUT,
 		GPIO_CFG_PULL_UP, GPIO_CFG_2MA),
 };
 
-static void monarudo_clear_hw_reset(void)
+static void deluxe_ub1_clear_hw_reset(void)
 {
-	if (system_rev >= PVT ) { 
-		printk(KERN_INFO "[KEY] %s ++++++\n", __func__);
-		gpio_tlmm_config(hw_clr_gpio_table[1], GPIO_CFG_ENABLE);
-		gpio_set_value(RESET_EN_CLRz_XC, 0);
-		msleep(100);
-		gpio_tlmm_config(hw_clr_gpio_table[0], GPIO_CFG_ENABLE);
-		printk(KERN_INFO "[KEY] %s ------\n", __func__);
-	}
-	else {
-		printk(KERN_INFO "[KEY] %s: No Clear_HW_Reset pin\n", __func__);
-	}
-
+	printk(KERN_INFO "[KEY] %s ++++++\n", __func__);
+	gpio_tlmm_config(hw_clr_gpio_table[1], GPIO_CFG_ENABLE);
+	gpio_set_value(RESET_EN_CLRz, 0);
+	msleep(100);
+	gpio_tlmm_config(hw_clr_gpio_table[0], GPIO_CFG_ENABLE);
+	printk(KERN_INFO "[KEY] %s ------\n", __func__);
 }
 
-static struct gpio_event_input_info monarudo_keypad_power_info = {
+static struct gpio_event_input_info deluxe_ub1_keypad_power_info = {
 	.info.func = gpio_event_input_func,
 	.flags = GPIOEDF_PRINT_KEYS,
 	.type = EV_KEY,
@@ -123,31 +86,31 @@ static struct gpio_event_input_info monarudo_keypad_power_info = {
 # else
 	.debounce_time.tv64 = 20 * NSEC_PER_MSEC,
 # endif
-	.keymap = monarudo_keypad_map_xc,
-	.keymap_size = ARRAY_SIZE(monarudo_keypad_map_xc),
-	.setup_input_gpio = monarudo_direct_inputs_gpio,
-	.clear_hw_reset = monarudo_clear_hw_reset,
+	.keymap = deluxe_ub1_keypad_map,
+	.keymap_size = ARRAY_SIZE(deluxe_ub1_keypad_map),
+	.setup_input_gpio = deluxe_ub1_direct_inputs_gpio,
+	.clear_hw_reset = deluxe_ub1_clear_hw_reset,
 };
 
-static struct gpio_event_info *monarudo_keypad_info[] = {
-	&monarudo_keypad_power_info.info,
+static struct gpio_event_info *deluxe_ub1_keypad_info[] = {
+	&deluxe_ub1_keypad_power_info.info,
 };
 
-static struct gpio_event_platform_data monarudo_keypad_data = {
+static struct gpio_event_platform_data deluxe_ub1_keypad_data = {
 	.name = "keypad_8960",
-	.info = monarudo_keypad_info,
-	.info_count = ARRAY_SIZE(monarudo_keypad_info),
+	.info = deluxe_ub1_keypad_info,
+	.info_count = ARRAY_SIZE(deluxe_ub1_keypad_info),
 };
 
-static struct platform_device monarudo_keypad_device = {
+static struct platform_device deluxe_ub1_keypad_device = {
 	.name = GPIO_EVENT_DEV_NAME,
 	.id = 0,
 	.dev		= {
-		.platform_data	= &monarudo_keypad_data,
+		.platform_data	= &deluxe_ub1_keypad_data,
 	},
 };
 
-static struct keyreset_platform_data monarudo_reset_keys_pdata = {
+static struct keyreset_platform_data deluxe_ub1_reset_keys_pdata = {
 	
 	.keys_down = {
 		KEY_POWER,
@@ -157,24 +120,16 @@ static struct keyreset_platform_data monarudo_reset_keys_pdata = {
 	},
 };
 
-static struct platform_device monarudo_reset_keys_device = {
+static struct platform_device deluxe_ub1_reset_keys_device = {
 	.name = KEYRESET_NAME,
-	.dev.platform_data = &monarudo_reset_keys_pdata,
+	.dev.platform_data = &deluxe_ub1_reset_keys_pdata,
 };
 
-int __init monarudo_init_keypad(void)
+int __init deluxe_ub1_init_keypad(void)
 {
-	if (platform_device_register(&monarudo_reset_keys_device))
+	if (platform_device_register(&deluxe_ub1_reset_keys_device))
 		printk(KERN_WARNING "%s: register reset key fail\n", __func__);
 
-
-	if (system_rev < 2) { 
-		monarudo_keypad_power_info.keymap = monarudo_keypad_map;
-		monarudo_keypad_power_info.keymap_size =
-			ARRAY_SIZE(monarudo_keypad_map);
-        }
-
-
-	return platform_device_register(&monarudo_keypad_device);
+	return platform_device_register(&deluxe_ub1_keypad_device);
 }
 

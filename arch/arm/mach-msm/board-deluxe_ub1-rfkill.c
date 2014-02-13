@@ -20,10 +20,7 @@
 #include <linux/rfkill.h>
 #include <linux/gpio.h>
 #include <asm/mach-types.h>
-#include <asm/setup.h>
 #include <linux/mfd/pm8xxx/pm8921.h>
-
-#include <mach/msm_xo.h>
 
 #include "board-deluxe_ub1.h"
 
@@ -34,7 +31,6 @@ struct pm8xxx_gpio_init {
 	unsigned			gpio;
 	struct pm_gpio			config;
 };
-struct msm_xo_voter *xo_handle; 
 
 #define PM8XXX_GPIO_INIT(_gpio, _dir, _buf, _val, _pull, _vin, _out_strength, \
 			_func, _inv, _disable) \
@@ -53,72 +49,72 @@ struct msm_xo_voter *xo_handle;
 	} \
 }
 
-struct pm8xxx_gpio_init monarudo_bt_pmic_gpio_xc[] = {
-	PM8XXX_GPIO_INIT(BT_REG_ON_XC, PM_GPIO_DIR_OUT, PM_GPIO_OUT_BUF_CMOS, 0, \
+struct pm8xxx_gpio_init deluxe_ub1_bt_pmic_gpio[] = {
+	PM8XXX_GPIO_INIT(BT_REG_ON, PM_GPIO_DIR_OUT, PM_GPIO_OUT_BUF_CMOS, 0, \
 				PM_GPIO_PULL_NO, PM_GPIO_VIN_S4, \
 				PM_GPIO_STRENGTH_LOW, \
 				PM_GPIO_FUNC_NORMAL, 0, 0),
-	PM8XXX_GPIO_INIT(BT_WAKE_XC, PM_GPIO_DIR_OUT, PM_GPIO_OUT_BUF_CMOS, 0, \
+	PM8XXX_GPIO_INIT(BT_WAKE, PM_GPIO_DIR_OUT, PM_GPIO_OUT_BUF_CMOS, 0, \
 				PM_GPIO_PULL_NO, PM_GPIO_VIN_S4, \
 				PM_GPIO_STRENGTH_LOW, \
 				PM_GPIO_FUNC_NORMAL, 0, 0),
-	PM8XXX_GPIO_INIT(BT_HOST_WAKE_XC, PM_GPIO_DIR_IN, PM_GPIO_OUT_BUF_CMOS, 0, \
+	PM8XXX_GPIO_INIT(BT_HOST_WAKE, PM_GPIO_DIR_IN, PM_GPIO_OUT_BUF_CMOS, 0, \
 				PM_GPIO_PULL_DN, PM_GPIO_VIN_S4, \
 				PM_GPIO_STRENGTH_NO, \
 				PM_GPIO_FUNC_NORMAL, 0, 0),
 };
 
 
-static uint32_t monarudo_GPIO_bt_on_table[] = {
+static uint32_t deluxe_ub1_GPIO_bt_on_table[] = {
 
 	
-	GPIO_CFG(BT_UART_RTSz_XC,
+	GPIO_CFG(BT_UART_RTSz,
 				2,
 				GPIO_CFG_OUTPUT,
 				GPIO_CFG_NO_PULL,
 				GPIO_CFG_8MA),
 	
-	GPIO_CFG(BT_UART_CTSz_XC,
+	GPIO_CFG(BT_UART_CTSz,
 				2,
 				GPIO_CFG_INPUT,
 				GPIO_CFG_PULL_UP,
 				GPIO_CFG_8MA),
 	
-	GPIO_CFG(BT_UART_RX_XC,
+	GPIO_CFG(BT_UART_RX,
 				2,
 				GPIO_CFG_INPUT,
 				GPIO_CFG_PULL_UP,
 				GPIO_CFG_8MA),
 	
-	GPIO_CFG(BT_UART_TX_XC,
+	GPIO_CFG(BT_UART_TX,
 				2,
 				GPIO_CFG_OUTPUT,
 				GPIO_CFG_NO_PULL,
 				GPIO_CFG_8MA),
 };
 
-static uint32_t monarudo_GPIO_bt_off_table[] = {
+static uint32_t deluxe_ub1_GPIO_bt_off_table[] = {
 
 	
-	GPIO_CFG(BT_UART_RTSz_XC,
+	GPIO_CFG(BT_UART_RTSz,
 				0,
 				GPIO_CFG_INPUT,
 				GPIO_CFG_PULL_DOWN,
 				GPIO_CFG_8MA),
 	
-	GPIO_CFG(BT_UART_CTSz_XC,
+	GPIO_CFG(BT_UART_CTSz,
 				0,
 				GPIO_CFG_INPUT,
 				GPIO_CFG_PULL_DOWN,
 				GPIO_CFG_8MA),
 	
-	GPIO_CFG(BT_UART_RX_XC,
+	GPIO_CFG(BT_UART_RX,
 				0,
 				GPIO_CFG_INPUT,
 				GPIO_CFG_PULL_DOWN,
 				GPIO_CFG_8MA),
 	
-	GPIO_CFG(BT_UART_TX_XC,
+	GPIO_CFG(BT_UART_TX,
 				0,
 				GPIO_CFG_INPUT,
 				GPIO_CFG_PULL_DOWN,
@@ -138,46 +134,41 @@ static void config_bt_table(uint32_t *table, int len)
 	}
 }
 
-static void monarudo_GPIO_config_bt_on(void)
+static void deluxe_ub1_GPIO_config_bt_on(void)
 {
 	printk(KERN_INFO "[BT]== R ON ==\n");
 
-	if(system_rev == XC)
-	{
-		msm_xo_mode_vote(xo_handle, MSM_XO_MODE_ON);
-		pr_info("[BT] %s: msm_xo_mode_vote MSM_XO_MODE_ON\n", __func__);
-	}
 	
-	config_bt_table(monarudo_GPIO_bt_on_table,
-				ARRAY_SIZE(monarudo_GPIO_bt_on_table));
+	config_bt_table(deluxe_ub1_GPIO_bt_on_table,
+				ARRAY_SIZE(deluxe_ub1_GPIO_bt_on_table));
 	mdelay(2);
 
 
 	
-	gpio_set_value(PM8921_GPIO_PM_TO_SYS(BT_REG_ON_XC), 0);
+	gpio_set_value(PM8921_GPIO_PM_TO_SYS(BT_REG_ON), 0);
 	mdelay(5);
 
 	
-	gpio_set_value(PM8921_GPIO_PM_TO_SYS(BT_WAKE_XC), 0); 
+	gpio_set_value(PM8921_GPIO_PM_TO_SYS(BT_WAKE), 0); 
 
 	mdelay(5);
 	
-	gpio_set_value(PM8921_GPIO_PM_TO_SYS(BT_REG_ON_XC), 1);
+	gpio_set_value(PM8921_GPIO_PM_TO_SYS(BT_REG_ON), 1);
 
 	mdelay(1);
 
 }
 
-static void monarudo_GPIO_config_bt_off(void)
+static void deluxe_ub1_GPIO_config_bt_off(void)
 {
 
 	
-	gpio_set_value(PM8921_GPIO_PM_TO_SYS(BT_REG_ON_XC), 0);
+	gpio_set_value(PM8921_GPIO_PM_TO_SYS(BT_REG_ON), 0);
 	mdelay(1);
 
 	
-	config_bt_table(monarudo_GPIO_bt_off_table,
-				ARRAY_SIZE(monarudo_GPIO_bt_off_table));
+	config_bt_table(deluxe_ub1_GPIO_bt_off_table,
+				ARRAY_SIZE(deluxe_ub1_GPIO_bt_off_table));
 	mdelay(2);
 
 	
@@ -194,31 +185,26 @@ static void monarudo_GPIO_config_bt_off(void)
 	
 
 	
-	gpio_set_value(PM8921_GPIO_PM_TO_SYS(BT_WAKE_XC), 0); 
+	gpio_set_value(PM8921_GPIO_PM_TO_SYS(BT_WAKE), 0); 
 
 	printk(KERN_INFO "[BT]== R OFF ==\n");
-	if(system_rev == XC)
-	{
-		msm_xo_mode_vote(xo_handle, MSM_XO_MODE_OFF);
-		pr_info("[BT] %s: msm_xo_mode_vote MSM_XO_MODE_OFF\n",	__func__);
-	}
 }
 
 static int bluetooth_set_power(void *data, bool blocked)
 {
 	if (!blocked)
-		monarudo_GPIO_config_bt_on();
+		deluxe_ub1_GPIO_config_bt_on();
 	else
-		monarudo_GPIO_config_bt_off();
+		deluxe_ub1_GPIO_config_bt_off();
 
 	return 0;
 }
 
-static struct rfkill_ops monarudo_rfkill_ops = {
+static struct rfkill_ops deluxe_ub1_rfkill_ops = {
 	.set_block = bluetooth_set_power,
 };
 
-static int monarudo_rfkill_probe(struct platform_device *pdev)
+static int deluxe_ub1_rfkill_probe(struct platform_device *pdev)
 {
 	int rc = 0;
 	bool default_state = true;  
@@ -228,18 +214,18 @@ static int monarudo_rfkill_probe(struct platform_device *pdev)
 	
 	mdelay(2);
 
-	for( i = 0; i < ARRAY_SIZE(monarudo_bt_pmic_gpio_xc); i++) {
-		rc = pm8xxx_gpio_config(monarudo_bt_pmic_gpio_xc[i].gpio,
-					&monarudo_bt_pmic_gpio_xc[i].config);
+	for( i = 0; i < ARRAY_SIZE(deluxe_ub1_bt_pmic_gpio); i++) {
+		rc = pm8xxx_gpio_config(deluxe_ub1_bt_pmic_gpio[i].gpio,
+					&deluxe_ub1_bt_pmic_gpio[i].config);
 		if (rc)
-			pr_info("[BT] %s: Config ERROR: GPIO=%u, rc=%d\n",
-				__func__, monarudo_bt_pmic_gpio_xc[i].gpio, rc);
+			pr_info("[bt] %s: Config ERROR: GPIO=%u, rc=%d\n",
+				__func__, deluxe_ub1_bt_pmic_gpio[i].gpio, rc);
 	}
 
 	bluetooth_set_power(NULL, default_state);
 
 	bt_rfk = rfkill_alloc(bt_name, &pdev->dev, RFKILL_TYPE_BLUETOOTH,
-				&monarudo_rfkill_ops, NULL);
+				&deluxe_ub1_rfkill_ops, NULL);
 	if (!bt_rfk) {
 		rc = -ENOMEM;
 		goto err_rfkill_alloc;
@@ -261,46 +247,34 @@ err_rfkill_alloc:
 	return rc;
 }
 
-static int monarudo_rfkill_remove(struct platform_device *dev)
+static int deluxe_ub1_rfkill_remove(struct platform_device *dev)
 {
 	rfkill_unregister(bt_rfk);
 	rfkill_destroy(bt_rfk);
 	return 0;
 }
 
-static struct platform_driver monarudo_rfkill_driver = {
-	.probe = monarudo_rfkill_probe,
-	.remove = monarudo_rfkill_remove,
+static struct platform_driver deluxe_ub1_rfkill_driver = {
+	.probe = deluxe_ub1_rfkill_probe,
+	.remove = deluxe_ub1_rfkill_remove,
 	.driver = {
-		.name = "monarudo_rfkill",
+		.name = "deluxe_ub1_rfkill",
 		.owner = THIS_MODULE,
 	},
 };
 
-static int __init monarudo_rfkill_init(void)
+static int __init deluxe_ub1_rfkill_init(void)
 {
-	if (system_rev < XC) {
-		pr_err("[BT]%s: cannot run BT under DLX XA and XB \n", __func__);
-		return 0;
-	}
-	if(system_rev == XC) {
-		xo_handle = msm_xo_get(MSM_XO_TCXO_D0, "bt");
-		if (IS_ERR(xo_handle)) {
-			pr_err("[BT] %s not able to get the handle to vote for TCXO D0 buffer\n", __func__);
-		}
-	}
-	return platform_driver_register(&monarudo_rfkill_driver);
+	return platform_driver_register(&deluxe_ub1_rfkill_driver);
 }
 
-static void __exit monarudo_rfkill_exit(void)
+static void __exit deluxe_ub1_rfkill_exit(void)
 {
-	if(system_rev == XC)
-		 msm_xo_put(xo_handle);
-	platform_driver_unregister(&monarudo_rfkill_driver);
+	platform_driver_unregister(&deluxe_ub1_rfkill_driver);
 }
 
-module_init(monarudo_rfkill_init);
-module_exit(monarudo_rfkill_exit);
-MODULE_DESCRIPTION("monarudo rfkill");
+module_init(deluxe_ub1_rfkill_init);
+module_exit(deluxe_ub1_rfkill_exit);
+MODULE_DESCRIPTION("deluxe_ub1 rfkill");
 MODULE_AUTHOR("htc_ssdbt <htc_ssdbt@htc.com>");
 MODULE_LICENSE("GPL");

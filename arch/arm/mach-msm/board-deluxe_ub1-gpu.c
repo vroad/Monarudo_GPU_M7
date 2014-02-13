@@ -242,7 +242,7 @@ struct platform_device device_kgsl_3d0 = {
 	},
 };
 
-void __init monarudo_init_gpu(void)
+void __init deluxe_ub1_init_gpu(void)
 {
 	unsigned int version = socinfo_get_version();
 

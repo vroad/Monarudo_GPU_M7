@@ -29,7 +29,7 @@
 static atomic_t q6_effect_mode = ATOMIC_INIT(-1);
 extern unsigned int system_rev;
 
-static int monarudo_get_hw_component(void)
+static int deluxe_ub1_get_hw_component(void)
 {
     int hw_com = 0;
 
@@ -42,7 +42,7 @@ static int monarudo_get_hw_component(void)
     return hw_com;
 }
 
-static int monarudo_enable_digital_mic(void)
+static int deluxe_ub1_enable_digital_mic(void)
 {
 	return 1;
 }
@@ -66,8 +66,8 @@ int apq8064_get_24b_audio(void)
 }
 
 static struct acoustic_ops acoustic = {
-        .enable_digital_mic = monarudo_enable_digital_mic,
-        .get_hw_component = monarudo_get_hw_component,
+        .enable_digital_mic = deluxe_ub1_enable_digital_mic,
+        .get_hw_component = deluxe_ub1_get_hw_component,
 	.set_q6_effect = apq8064_set_q6_effect_mode
 };
 
@@ -83,7 +83,7 @@ static struct msm_compr_q6_ops cops = {
 	.get_24b_audio = apq8064_get_24b_audio,
 };
 
-static int __init monarudo_audio_init(void)
+static int __init deluxe_ub1_audio_init(void)
 {
         int ret = 0;
 
@@ -108,13 +108,13 @@ static int __init monarudo_audio_init(void)
 	return ret;
 
 }
-late_initcall(monarudo_audio_init);
+late_initcall(deluxe_ub1_audio_init);
 
-static void __exit monarudo_audio_exit(void)
+static void __exit deluxe_ub1_audio_exit(void)
 {
 	pr_info("%s", __func__);
 }
-module_exit(monarudo_audio_exit);
+module_exit(deluxe_ub1_audio_exit);
 
 MODULE_DESCRIPTION("ALSA Platform Elite");
 MODULE_LICENSE("GPL v2");

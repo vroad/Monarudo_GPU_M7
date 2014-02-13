@@ -17,7 +17,6 @@
 #include <linux/bootmem.h>
 #include <asm/mach-types.h>
 #include <asm/mach/mmc.h>
-#include <asm/setup.h>
 #include <mach/msm_bus_board.h>
 #include <mach/board.h>
 #include <mach/gpio.h>
@@ -83,9 +82,8 @@ static struct gpiomux_setting  pri_i2s[] = {
 	
 	{
 		.func = GPIOMUX_FUNC_GPIO,
-		.drv = GPIOMUX_DRV_2MA,
-		.pull = GPIOMUX_PULL_DOWN,
-		.dir = GPIOMUX_IN,
+		.drv = GPIOMUX_DRV_8MA,
+		.pull = GPIOMUX_PULL_NONE,
 	},
 	
 	{
@@ -140,7 +138,7 @@ static struct gpiomux_setting gpio_spi_cs_config = {
 	.pull = GPIOMUX_PULL_UP,
 };
 
-struct msm_gpiomux_config monarudo_ethernet_configs[] = {
+struct msm_gpiomux_config deluxe_ub1_ethernet_configs[] = {
 };
 #endif
 
@@ -215,7 +213,7 @@ static struct gpiomux_setting wdc_intr = {
 	.drv = GPIOMUX_DRV_2MA,
 	.pull = GPIOMUX_PULL_DOWN,
 };
-#if 1
+#if 0
 static struct gpiomux_setting wcnss_5wire_suspend_cfg = {
 	.func = GPIOMUX_FUNC_GPIO,
 	.drv  = GPIOMUX_DRV_2MA,
@@ -231,16 +229,26 @@ static struct gpiomux_setting wcnss_5wire_active_cfg = {
 
 static struct gpiomux_setting slimbus = {
 	.func = GPIOMUX_FUNC_1,
-	.drv = GPIOMUX_DRV_16MA,
+	.drv = GPIOMUX_DRV_6MA,
 	.pull = GPIOMUX_PULL_KEEPER,
 };
 
+#if 0
 static struct gpiomux_setting ext_regulator_config = {
 	.func = GPIOMUX_FUNC_GPIO,
 	.drv = GPIOMUX_DRV_8MA,
 	.pull = GPIOMUX_PULL_NONE,
 	.dir = GPIOMUX_OUT_LOW,
 };
+#endif
+
+#ifdef CONFIG_SERIAL_IRDA
+static struct gpiomux_setting gsbi3_func1_cfg = {
+	.func = GPIOMUX_FUNC_1,
+	.drv = GPIOMUX_DRV_8MA,
+	.pull = GPIOMUX_PULL_NONE,
+};
+#endif
 
 static struct gpiomux_setting gsbi7_func1_cfg = {
 	.func = GPIOMUX_FUNC_1,
@@ -381,7 +389,7 @@ static struct msm_gpiomux_config cyts_gpio_configs[] __initdata = {
 	},
 };
 #endif
-static struct msm_gpiomux_config monarudo_hsic_configs[] = {
+static struct msm_gpiomux_config deluxe_ub1_hsic_configs[] = {
 	{
 		.gpio = 88,               
 		.settings = {
@@ -474,13 +482,7 @@ static struct gpiomux_setting mhl_suspend_cfg = {
         .pull = GPIOMUX_PULL_NONE,
 };
 
-static struct gpiomux_setting mhl_active_1_cfg = {
-        .func = GPIOMUX_FUNC_GPIO,
-        .drv = GPIOMUX_DRV_2MA,
-        .pull = GPIOMUX_PULL_UP,
-};
-
-static struct gpiomux_setting mhl_active_2_cfg = {
+static struct gpiomux_setting mhl_active_cfg = {
         .func = GPIOMUX_FUNC_GPIO,
         .drv = GPIOMUX_DRV_2MA,
         .pull = GPIOMUX_PULL_UP,
@@ -488,26 +490,9 @@ static struct gpiomux_setting mhl_active_2_cfg = {
 
 static struct msm_gpiomux_config mhl_configs[] __initdata = {
 	{
-		.gpio = MHL_RSTz_XA,
-		.settings = {
-			[GPIOMUX_ACTIVE]    = &mhl_active_1_cfg,
-			[GPIOMUX_SUSPENDED] = &mhl_suspend_cfg,
-		},
-	},
-	{
 		.gpio = MHL_INT,
 		.settings = {
-			[GPIOMUX_ACTIVE]    = &mhl_active_2_cfg,
-			[GPIOMUX_SUSPENDED] = &mhl_suspend_cfg,
-		},
-	},
-};
-
-static struct msm_gpiomux_config mhl_configs_xc[] __initdata = {
-	{
-		.gpio = MHL_INT,
-		.settings = {
-			[GPIOMUX_ACTIVE]    = &mhl_active_2_cfg,
+			[GPIOMUX_ACTIVE]    = &mhl_active_cfg,
 			[GPIOMUX_SUSPENDED] = &mhl_suspend_cfg,
 		},
 	},
@@ -562,7 +547,7 @@ static struct msm_gpiomux_config hdmi_configs[] __initdata = {
 };
 #endif
 
-static struct msm_gpiomux_config monarudo_gsbi_configs[] __initdata = {
+static struct msm_gpiomux_config deluxe_ub1_gsbi_configs[] __initdata = {
 	{
 		.gpio      = 21,		
 		.settings = {
@@ -593,6 +578,21 @@ static struct msm_gpiomux_config monarudo_gsbi_configs[] __initdata = {
 		},
 	},
 
+#ifdef CONFIG_SERIAL_IRDA
+	{
+		.gpio      = 6,			
+		.settings = {
+			[GPIOMUX_SUSPENDED] = &gsbi3_func1_cfg,
+		},
+	},
+	{
+		.gpio      = 7,			
+		.settings = {
+			[GPIOMUX_SUSPENDED] = &gsbi3_func1_cfg,
+		},
+	},
+#endif
+
 	{
 		.gpio      = 8,			
 		.settings = {
@@ -608,6 +608,13 @@ static struct msm_gpiomux_config monarudo_gsbi_configs[] __initdata = {
 		},
 	},
 
+	{
+		.gpio      = 10,		
+		.settings = {
+			[GPIOMUX_SUSPENDED] = &gsbi4_suspended_cfg,
+			[GPIOMUX_ACTIVE] = &gsbi4_active_cfg,
+		},
+	},
 	{
 		.gpio      = 11,		
 		.settings = {
@@ -700,7 +707,7 @@ static struct msm_gpiomux_config monarudo_gsbi_configs[] __initdata = {
 	},
 };
 
-static struct msm_gpiomux_config monarudo_slimbus_config[] __initdata = {
+static struct msm_gpiomux_config deluxe_ub1_slimbus_config[] __initdata = {
 	{
 		.gpio   = 40,           
 		.settings = {
@@ -715,7 +722,7 @@ static struct msm_gpiomux_config monarudo_slimbus_config[] __initdata = {
 	},
 };
 
-static struct msm_gpiomux_config monarudo_audio_codec_configs[] __initdata = {
+static struct msm_gpiomux_config deluxe_ub1_audio_codec_configs[] __initdata = {
 	{
 		.gpio = 39,
 		.settings = {
@@ -731,14 +738,16 @@ static struct msm_gpiomux_config monarudo_audio_codec_configs[] __initdata = {
 
 };
 
-static struct msm_gpiomux_config monarudo_ext_regulator_configs[] __initdata = {
+#if 0
+static struct msm_gpiomux_config deluxe_ub1_ext_regulator_configs[] __initdata = {
 	{
-		.gpio = monarudo_EXT_3P3V_REG_EN_GPIO,
+		.gpio = deluxe_ub1_EXT_3P3V_REG_EN_GPIO,
 		.settings = {
 			[GPIOMUX_SUSPENDED] = &ext_regulator_config,
 		},
 	},
 };
+#endif
 
 #if 0
 static struct gpiomux_setting ap2mdm_cfg = {
@@ -817,7 +826,7 @@ static struct gpiomux_setting gpio_rotate_key_sus_config = {
 	.func = GPIOMUX_FUNC_GPIO,
 };
 
-struct msm_gpiomux_config monarudo_rotate_key_config[] = {
+struct msm_gpiomux_config deluxe_ub1_rotate_key_config[] = {
 	{
 		.gpio = 46,
 		.settings = {
@@ -827,7 +836,7 @@ struct msm_gpiomux_config monarudo_rotate_key_config[] = {
 	},
 };
 #if 0
-static struct msm_gpiomux_config monarudo_mxt_configs[] __initdata = {
+static struct msm_gpiomux_config deluxe_ub1_mxt_configs[] __initdata = {
 	{	
 		.gpio = 6,
 		.settings = {
@@ -844,7 +853,7 @@ static struct msm_gpiomux_config monarudo_mxt_configs[] __initdata = {
 	},
 };
 #endif
-#if 1
+#if 0
 static struct msm_gpiomux_config wcnss_5wire_interface[] = {
 	{
 		.gpio = 64,
@@ -860,18 +869,16 @@ static struct msm_gpiomux_config wcnss_5wire_interface[] = {
 			[GPIOMUX_SUSPENDED] = &wcnss_5wire_suspend_cfg,
 		},
 	},
-#if 0
 	{
-		.gpio = 67,
+		.gpio = 68,
 		.settings = {
 			[GPIOMUX_ACTIVE]    = &wcnss_5wire_active_cfg,
 			[GPIOMUX_SUSPENDED] = &wcnss_5wire_suspend_cfg,
 		},
 	},
-#endif
 };
 #endif
-void __init monarudo_init_gpiomux(void)
+void __init deluxe_ub1_init_gpiomux(void)
 {
 	int rc;
 
@@ -882,48 +889,39 @@ void __init monarudo_init_gpiomux(void)
 	}
 
 #if defined(CONFIG_KS8851) || defined(CONFIG_KS8851_MODULE)
-	msm_gpiomux_install(monarudo_ethernet_configs,
-			ARRAY_SIZE(monarudo_ethernet_configs));
+	msm_gpiomux_install(deluxe_ub1_ethernet_configs,
+			ARRAY_SIZE(deluxe_ub1_ethernet_configs));
 #endif
-#if 1
+#if 0
 	msm_gpiomux_install(wcnss_5wire_interface,
 			ARRAY_SIZE(wcnss_5wire_interface));
 #endif
-	msm_gpiomux_install(monarudo_gsbi_configs,
-			ARRAY_SIZE(monarudo_gsbi_configs));
+	msm_gpiomux_install(deluxe_ub1_gsbi_configs,
+			ARRAY_SIZE(deluxe_ub1_gsbi_configs));
 
-	msm_gpiomux_install(monarudo_slimbus_config,
-			ARRAY_SIZE(monarudo_slimbus_config));
+	msm_gpiomux_install(deluxe_ub1_slimbus_config,
+			ARRAY_SIZE(deluxe_ub1_slimbus_config));
 
-	msm_gpiomux_install(monarudo_audio_codec_configs,
-			ARRAY_SIZE(monarudo_audio_codec_configs));
+	msm_gpiomux_install(deluxe_ub1_audio_codec_configs,
+			ARRAY_SIZE(deluxe_ub1_audio_codec_configs));
 
-	
 	msm_gpiomux_install(msm8960_mi2s_rx_configs,
 		ARRAY_SIZE(msm8960_mi2s_rx_configs));
 
-	if (system_rev >= XC) {
-		msm_gpiomux_install(msm8960_i2s_tx_configs,
-			ARRAY_SIZE(msm8960_i2s_tx_configs));
-		msm_gpiomux_install(monarudo_aux_pcm_configs,
-			ARRAY_SIZE(monarudo_aux_pcm_configs));
-	}
+	msm_gpiomux_install(msm8960_i2s_tx_configs,
+		ARRAY_SIZE(msm8960_i2s_tx_configs));
+    msm_gpiomux_install(monarudo_aux_pcm_configs,
+		ARRAY_SIZE(monarudo_aux_pcm_configs));
 
 #ifdef CONFIG_FB_MSM_HDMI_MSM_PANEL
         msm_gpiomux_install(mhl_i2c_configs,
                         ARRAY_SIZE(mhl_i2c_configs));
         msm_gpiomux_install(hdmi_configs,
                         ARRAY_SIZE(hdmi_configs));
-		if (system_rev >= XC)
-			msm_gpiomux_install(mhl_configs_xc,
-							ARRAY_SIZE(mhl_configs_xc));
-		else
-			msm_gpiomux_install(mhl_configs,
-							ARRAY_SIZE(mhl_configs));
+        msm_gpiomux_install(mhl_configs,
+                        ARRAY_SIZE(mhl_configs));
 #endif
 
-	msm_gpiomux_install(monarudo_ext_regulator_configs,
-			ARRAY_SIZE(monarudo_ext_regulator_configs));
 
 #if 0
 	msm_gpiomux_install(mdm_configs,
@@ -931,8 +929,8 @@ void __init monarudo_init_gpiomux(void)
 #endif
 
 #ifdef CONFIG_USB_EHCI_MSM_HSIC
-	msm_gpiomux_install(monarudo_hsic_configs,
-		ARRAY_SIZE(monarudo_hsic_configs));
+	msm_gpiomux_install(deluxe_ub1_hsic_configs,
+		ARRAY_SIZE(deluxe_ub1_hsic_configs));
 #endif
 
 }
