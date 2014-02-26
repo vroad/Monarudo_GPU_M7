@@ -275,7 +275,7 @@ int msm_cpufreq_set_freq_limits(uint32_t cpu, uint32_t min, uint32_t max)
 }
 EXPORT_SYMBOL(msm_cpufreq_set_freq_limits);
 
-static int __cpuinit msm_cpufreq_init(struct cpufreq_policy *policy)
+static int msm_cpufreq_init(struct cpufreq_policy *policy)
 {
 	int cur_freq;
 	int index;
@@ -339,7 +339,13 @@ static int __cpuinit msm_cpufreq_init(struct cpufreq_policy *policy)
 	INIT_WORK(&cpu_work->work, set_cpu_work);
 	init_completion(&cpu_work->complete);
 #endif
-
+#ifdef CONFIG_CMDLINE_OPTIONS
+	policy->max = cmdline_maxkhz;
+	policy->min = cmdline_minkhz;
+#else 
+	policy->max = 1512000;
+	policy->min = 384000; 
+#endif
 	return 0;
 }
 

@@ -3236,12 +3236,22 @@ static struct platform_device msm_tsens_device = {
 };
 
 static struct msm_thermal_data msm_thermal_pdata = {
-	.sensor_id = 0,
-	.poll_ms = 1000,
-	.limit_temp = 51,
-	.temp_hysteresis = 10,
-	.limit_freq = 918000,
+  .sensor_id = 0,
+  .poll_ms = 100,
+  .shutdown_temp = 88,
+
+  .allowed_max_high = 84,
+  .allowed_max_low = 80,
+  .allowed_max_freq = 384000,
+  .allowed_mid_high = 81,
+  .allowed_mid_low = 76,
+  .allowed_mid_freq = 810000,
+
+  .allowed_low_high = 79,
+  .allowed_low_low = 73,
+  .allowed_low_freq = 1350000,
 };
+
 
 static int __init check_dq_setup(char *str)
 {
@@ -4200,8 +4210,8 @@ static struct platform_device *common_devices[] __initdata = {
 #ifdef CONFIG_MSM_ROTATOR
 	&msm_rotator_device,
 #endif
-	&msm8960_cpu_idle_device,
-	&msm8960_msm_gov_device,
+	&apq8064_cpu_idle_device,
+	&apq8064_msm_gov_device,
 	&msm_tsens_device,
 	&msm_device_tz_log,
 	&apq8064_iommu_domain_device,
@@ -4209,7 +4219,7 @@ static struct platform_device *common_devices[] __initdata = {
 	&apq8064_device_cache_erp,
 #endif
 #ifdef CONFIG_PERFLOCK
-	&msm8064_device_perf_lock,
+	&apq8064_device_perf_lock,
 #endif
 #if defined(CONFIG_TSIF) || defined(CONFIG_TSIF_MODULE)
 	&msm_device_tsif[1],
