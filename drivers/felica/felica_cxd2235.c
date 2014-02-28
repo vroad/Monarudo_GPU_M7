@@ -1694,6 +1694,7 @@ int felica_uid_open(struct inode *inode, struct file *file)
 	memcpy( cmdline,cmdpos ,leng );
 	cmdline[leng] = '\0';
 
+#ifdef FELICA_CONFIG_ACCESS_RESTRICTION
 	if( ( strncmp(cmdline,gdiag_name,leng) != 0 ) &&
 		( strncmp(cmdline,PROCESS_NAME_FELICA_DAEMON,leng) != 0 ) )
 	{
@@ -1701,6 +1702,7 @@ int felica_uid_open(struct inode *inode, struct file *file)
 		return -EACCES;
 	}
 	FELICA_LOG_DEBUG("[FELICA_DD] %s END", __func__);
+#endif
 	return 0;
 }
 
