@@ -826,6 +826,28 @@ static char himax_e2[35] = {
 				0x10,0x0A,0x1F};
 #endif
 static char himax_e3[2] = {0xE3, 0x11}; 
+static char wfd_check_mdp_iommu_split_domain(void)
+{
+    return mdp_pdata.mdp_iommu_split_domain;
+}
+
+#ifdef CONFIG_FB_MSM_WRITEBACK_MSM_PANEL
+static struct msm_wfd_platform_data wfd_pdata = {
+    .wfd_check_mdp_iommu_split = wfd_check_mdp_iommu_split_domain,
+};
+
+static struct platform_device wfd_panel_device = {
+    .name = "wfd_panel",
+    .id = 0,
+    .dev.platform_data = NULL,
+};
+
+static struct platform_device wfd_device = {
+    .name          = "msm_wfd",
+    .id            = -1,
+    .dev.platform_data = &wfd_pdata,
+};
+#endif
 static char himax_e5[] = {	0xE5, 0x00, 0x15, 0x0B,
 				0x09, 0x05, 0x00, 0x80,
 				0x20, 0x80, 0x10, 0x00,
@@ -1410,6 +1432,10 @@ void __init impression_j_init_fb(void)
 		wa_xo = msm_xo_get(MSM_XO_TCXO_D0, "mipi");
 	}
 	msm_fb_register_device("dtv", &dtv_pdata);
+#ifdef CONFIG_FB_MSM_WRITEBACK_MSM_PANEL
+    platform_device_register(&wfd_panel_device);
+    platform_device_register(&wfd_device);
+#endif
 }
 
 static int __init impression_j_panel_init(void)

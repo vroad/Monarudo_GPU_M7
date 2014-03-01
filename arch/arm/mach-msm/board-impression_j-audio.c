@@ -27,7 +27,7 @@ static atomic_t q6_effect_mode = ATOMIC_INIT(-1);
 #define HAC_PAMP_GPIO	6
 static struct regulator *reg_8921_lvs2;
 extern unsigned int system_rev;
-
+#include "../sound/soc/msm/msm-compr-q6.h"
 static int power_on_amp(char *power, struct regulator **regul)
 {
 	int rc;
@@ -105,6 +105,11 @@ int apq8064_get_q6_effect_mode(void)
 	return mode;
 }
 
+int apq8064_get_24b_audio(void)
+{
+	return 1;
+}
+
 static struct acoustic_ops acoustic = {
         .enable_digital_mic = impression_enable_digital_mic,
         .get_hw_component = impression_get_hw_component,
@@ -117,6 +122,10 @@ static struct q6asm_ops qops = {
 
 static struct msm_pcm_routing_ops rops = {
 	.get_q6_effect = apq8064_get_q6_effect_mode,
+};
+
+static struct msm_compr_q6_ops cops = {
+	.get_24b_audio = apq8064_get_24b_audio,
 };
 
 static int __init impression_j_audio_init(void)
@@ -139,7 +148,9 @@ static int __init impression_j_audio_init(void)
         power_on_amp("8921_lvs2", &reg_8921_lvs2);
 	htc_register_q6asm_ops(&qops);
 	htc_register_pcm_routing_ops(&rops);
+	htc_register_compr_q6_ops(&cops);
 	acoustic_register_ops(&acoustic);
+	pr_info("%s", __func__);
 	return ret;
 
 }
