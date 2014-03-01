@@ -28,13 +28,13 @@
 #include <mach/gpiomux.h>
 #include <mach/restart.h>
 #include "devices.h"
-#include "board-deluxe_j.h"
+#include "board-impression_j.h"
+
+void impression_j_pm8xxx_adc_device_register(void);
 
 #ifdef CONFIG_SMB349_CHARGER
 #include "linux/i2c/smb349.h"
 #endif
-
-void deluxe_j_pm8xxx_adc_device_register(void);
 
 struct pm8xxx_gpio_init {
 	unsigned			gpio;
@@ -119,7 +119,6 @@ struct pm8xxx_mpp_init {
 			PM_GPIO_FUNC_NORMAL, 0, 0)
 
 static struct pm8xxx_gpio_init pm8921_gpios[] __initdata = {
-	PM8921_GPIO_OUTPUT_FUNC(26, 0, PM_GPIO_FUNC_2),
 	
 	PM8921_GPIO_OUTPUT(34, 1, MED),
 };
@@ -128,9 +127,6 @@ static struct pm8xxx_gpio_init pm8921_cdp_kp_gpios[] __initdata = {
 	
 };
 
-static struct pm8xxx_gpio_init pm8921_amp_gpios[] __initdata = {
-	PM8921_GPIO_OUTPUT(4, 1, MED),
-};
 
 static struct pm8xxx_mpp_init pm8xxx_mpps[] __initdata = {
 	PM8921_MPP_INIT(3, D_OUTPUT, PM8921_MPP_DIG_LEVEL_VPH, DOUT_CTRL_LOW),
@@ -145,7 +141,7 @@ static struct pm8xxx_mpp_init pm8xxx_mpps[] __initdata = {
 #endif
 };
 
-void __init deluxe_j_pm8xxx_gpio_mpp_init(void)
+void __init impression_j_pm8xxx_gpio_mpp_init(void)
 {
 	int i, rc;
 
@@ -177,16 +173,16 @@ void __init deluxe_j_pm8xxx_gpio_mpp_init(void)
 		}
 	}
 
-	pm8xxx_gpio_config(pm8921_amp_gpios[0].gpio, &pm8921_amp_gpios[0].config);
+	
 }
 
-static struct pm8xxx_pwrkey_platform_data deluxe_j_pm8921_pwrkey_pdata = {
+static struct pm8xxx_pwrkey_platform_data impression_j_pm8921_pwrkey_pdata = {
 	.pull_up		= 1,
 	.kpd_trigger_delay_us	= 15625,
 	.wakeup			= 1,
 };
 
-static struct pm8xxx_misc_platform_data deluxe_j_pm8921_misc_pdata = {
+static struct pm8xxx_misc_platform_data impression_j_pm8921_misc_pdata = {
 	.priority		= 0,
 };
 
@@ -218,13 +214,18 @@ static struct pm8xxx_led_configure pm8921_led_info[] = {
 	},
 };
 
-static struct pm8xxx_led_platform_data deluxe_j_pm8921_leds_pdata = {
+static struct pm8xxx_led_platform_data impression_j_pm8921_leds_pdata = {
 	.num_leds = ARRAY_SIZE(pm8921_led_info),
 	.leds = pm8921_led_info,
 };
 
+static struct pm8xxx_vibrator_platform_data pm8xxx_vib_pdata = {
+        .initial_vibrate_ms = 0,
+        .max_timeout_ms = 15000,
+        .level_mV = 3100,
+};
 
-static struct pm8xxx_adc_amux deluxe_j_pm8921_adc_channels_data[] = {
+static struct pm8xxx_adc_amux impression_j_pm8921_adc_channels_data[] = {
 	{"vcoin", CHANNEL_VCOIN, CHAN_PATH_SCALING2, AMUX_RSV1,
 		ADC_DECIMATION_TYPE2, ADC_SCALE_DEFAULT},
 	{"vbat", CHANNEL_VBAT, CHAN_PATH_SCALING2, AMUX_RSV1,
@@ -259,12 +260,12 @@ static struct pm8xxx_adc_amux deluxe_j_pm8921_adc_channels_data[] = {
 		ADC_DECIMATION_TYPE2, ADC_SCALE_DEFAULT},
 };
 
-static struct pm8xxx_adc_properties deluxe_j_pm8921_adc_data = {
+static struct pm8xxx_adc_properties impression_j_pm8921_adc_data = {
 	.adc_vdd_reference	= 1800, 
 	.bitresolution		= 15,
 	.bipolar                = 0,
 };
-static const struct pm8xxx_adc_map_pt deluxe_j_adcmap_btm_table[] = {
+static const struct pm8xxx_adc_map_pt impression_j_adcmap_btm_table[] = {
 	{-200,	1671},
 	{-190,	1663},
 	{-180,	1654},
@@ -368,31 +369,31 @@ static const struct pm8xxx_adc_map_pt deluxe_j_adcmap_btm_table[] = {
 };
 
 static struct pm8xxx_adc_map_table pm8xxx_adcmap_btm_table = {
-	.table = deluxe_j_adcmap_btm_table,
-	.size = ARRAY_SIZE(deluxe_j_adcmap_btm_table),
+	.table = impression_j_adcmap_btm_table,
+	.size = ARRAY_SIZE(impression_j_adcmap_btm_table),
 };
 
-static struct pm8xxx_adc_platform_data deluxe_j_pm8921_adc_pdata = {
-	.adc_channel		= deluxe_j_pm8921_adc_channels_data,
-	.adc_num_board_channel	= ARRAY_SIZE(deluxe_j_pm8921_adc_channels_data),
-	.adc_prop		= &deluxe_j_pm8921_adc_data,
+static struct pm8xxx_adc_platform_data impression_j_pm8921_adc_pdata = {
+	.adc_channel		= impression_j_pm8921_adc_channels_data,
+	.adc_num_board_channel	= ARRAY_SIZE(impression_j_pm8921_adc_channels_data),
+	.adc_prop		= &impression_j_pm8921_adc_data,
 	.adc_mpp_base		= PM8921_MPP_PM_TO_SYS(1),
 	.adc_map_btm_table	= &pm8xxx_adcmap_btm_table,
-	.pm8xxx_adc_device_register	= deluxe_j_pm8xxx_adc_device_register,
+	.pm8xxx_adc_device_register	= impression_j_pm8xxx_adc_device_register,
 };
 
 static struct pm8xxx_mpp_platform_data
-deluxe_j_pm8921_mpp_pdata __devinitdata = {
+impression_j_pm8921_mpp_pdata __devinitdata = {
 	.mpp_base	= PM8921_MPP_PM_TO_SYS(1),
 };
 
 static struct pm8xxx_gpio_platform_data
-deluxe_j_pm8921_gpio_pdata __devinitdata = {
+impression_j_pm8921_gpio_pdata __devinitdata = {
 	.gpio_base	= PM8921_GPIO_PM_TO_SYS(1),
 };
 
 static struct pm8xxx_irq_platform_data
-deluxe_j_pm8921_irq_pdata __devinitdata = {
+impression_j_pm8921_irq_pdata __devinitdata = {
 	.irq_base		= PM8921_IRQ_BASE,
 	.devirq			= MSM_GPIO_TO_INT(PM8921_APC_USR_IRQ_N),
 	.irq_trigger_flag	= IRQF_TRIGGER_LOW,
@@ -400,12 +401,12 @@ deluxe_j_pm8921_irq_pdata __devinitdata = {
 };
 
 static struct pm8xxx_rtc_platform_data
-deluxe_j_pm8921_rtc_pdata = {
+impression_j_pm8921_rtc_pdata = {
 	.rtc_write_enable       = true,
 	.rtc_alarm_powerup      = false,
 };
 
-static int deluxe_j_pm8921_therm_mitigation[] = {
+static int impression_j_pm8921_therm_mitigation[] = {
 	1100,
 	700,
 	600,
@@ -462,17 +463,16 @@ pm8921_chg_pdata __devinitdata = {
 	.warm_bat_chg_current	= 1025,
 	.cool_bat_voltage	= 4200,
 	.warm_bat_voltage	= 4000,
-	.mbat_in_gpio		= 0, 
-	.is_embeded_batt	= 1,
-	.thermal_mitigation	= deluxe_j_pm8921_therm_mitigation,
-	.thermal_levels		= ARRAY_SIZE(deluxe_j_pm8921_therm_mitigation),
+	.mbat_in_gpio		= MBAT_IN, 
+	.thermal_mitigation	= impression_j_pm8921_therm_mitigation,
+	.thermal_levels		= ARRAY_SIZE(impression_j_pm8921_therm_mitigation),
 	.cold_thr = PM_SMBC_BATT_TEMP_COLD_THR__HIGH,
 	.hot_thr = PM_SMBC_BATT_TEMP_HOT_THR__LOW,
 	.ext_usb = &smb_ext_chg,
 };
 
 static struct pm8xxx_ccadc_platform_data
-deluxe_j_pm8xxx_ccadc_pdata = {
+impression_j_pm8xxx_ccadc_pdata = {
 	.r_sense		= 10,
 	.calib_delay_ms		= 600000,
 };
@@ -504,24 +504,24 @@ static int __init check_dq_setup(char *str)
 __setup("androidboot.dq=", check_dq_setup);
 
 static struct pm8921_platform_data
-deluxe_j_pm8921_platform_data __devinitdata = {
-	.regulator_pdatas	= deluxe_j_pm8921_regulator_pdata,
-	.irq_pdata		= &deluxe_j_pm8921_irq_pdata,
-	.gpio_pdata		= &deluxe_j_pm8921_gpio_pdata,
-	.mpp_pdata		= &deluxe_j_pm8921_mpp_pdata,
-	.rtc_pdata		= &deluxe_j_pm8921_rtc_pdata,
-	.pwrkey_pdata	= &deluxe_j_pm8921_pwrkey_pdata,
-	
-	.misc_pdata		= &deluxe_j_pm8921_misc_pdata,
-	.leds_pdata		= &deluxe_j_pm8921_leds_pdata,
-	.adc_pdata		= &deluxe_j_pm8921_adc_pdata,
+impression_j_pm8921_platform_data __devinitdata = {
+	.regulator_pdatas	= impression_j_pm8921_regulator_pdata,
+	.irq_pdata		= &impression_j_pm8921_irq_pdata,
+	.gpio_pdata		= &impression_j_pm8921_gpio_pdata,
+	.mpp_pdata		= &impression_j_pm8921_mpp_pdata,
+	.rtc_pdata		= &impression_j_pm8921_rtc_pdata,
+	.pwrkey_pdata	= &impression_j_pm8921_pwrkey_pdata,
+	.misc_pdata		= &impression_j_pm8921_misc_pdata,
+	.leds_pdata		= &impression_j_pm8921_leds_pdata,
+	.adc_pdata		= &impression_j_pm8921_adc_pdata,
 	.charger_pdata		= &pm8921_chg_pdata,
 	.bms_pdata		= &pm8921_bms_pdata,
-	.ccadc_pdata		= &deluxe_j_pm8xxx_ccadc_pdata,
+	.ccadc_pdata		= &impression_j_pm8xxx_ccadc_pdata,
+        .vibrator_pdata         = &pm8xxx_vib_pdata,
 };
 
 static struct pm8xxx_irq_platform_data
-deluxe_j_pm8821_irq_pdata __devinitdata = {
+impression_j_pm8821_irq_pdata __devinitdata = {
 	.irq_base		= PM8821_IRQ_BASE,
 	.devirq			= PM8821_SEC_IRQ_N,
 	.irq_trigger_flag	= IRQF_TRIGGER_HIGH,
@@ -529,41 +529,41 @@ deluxe_j_pm8821_irq_pdata __devinitdata = {
 };
 
 static struct pm8xxx_mpp_platform_data
-deluxe_j_pm8821_mpp_pdata __devinitdata = {
+impression_j_pm8821_mpp_pdata __devinitdata = {
 	.mpp_base	= PM8821_MPP_PM_TO_SYS(1),
 };
 
 static struct pm8821_platform_data
-deluxe_j_pm8821_platform_data __devinitdata = {
-	.irq_pdata	= &deluxe_j_pm8821_irq_pdata,
-	.mpp_pdata	= &deluxe_j_pm8821_mpp_pdata,
+impression_j_pm8821_platform_data __devinitdata = {
+	.irq_pdata	= &impression_j_pm8821_irq_pdata,
+	.mpp_pdata	= &impression_j_pm8821_mpp_pdata,
 };
 
-static struct msm_ssbi_platform_data deluxe_j_ssbi_pm8921_pdata __devinitdata = {
+static struct msm_ssbi_platform_data impression_j_ssbi_pm8921_pdata __devinitdata = {
 	.controller_type = MSM_SBI_CTRL_PMIC_ARBITER,
 	.slave	= {
 		.name		= "pm8921-core",
-		.platform_data	= &deluxe_j_pm8921_platform_data,
+		.platform_data	= &impression_j_pm8921_platform_data,
 	},
 };
 
-static struct msm_ssbi_platform_data deluxe_j_ssbi_pm8821_pdata __devinitdata = {
+static struct msm_ssbi_platform_data impression_j_ssbi_pm8821_pdata __devinitdata = {
 	.controller_type = MSM_SBI_CTRL_PMIC_ARBITER,
 	.slave	= {
 		.name		= "pm8821-core",
-		.platform_data	= &deluxe_j_pm8821_platform_data,
+		.platform_data	= &impression_j_pm8821_platform_data,
 	},
 };
 
-void __init deluxe_j_init_pmic(void)
+void __init impression_j_init_pmic(void)
 {
 	pmic_reset_irq = PM8921_IRQ_BASE + PM8921_RESOUT_IRQ;
 
 	apq8064_device_ssbi_pmic1.dev.platform_data =
-						&deluxe_j_ssbi_pm8921_pdata;
+						&impression_j_ssbi_pm8921_pdata;
 	apq8064_device_ssbi_pmic2.dev.platform_data =
-				&deluxe_j_ssbi_pm8821_pdata;
-	deluxe_j_pm8921_platform_data.num_regulators =
-					deluxe_j_pm8921_regulator_pdata_len;
+				&impression_j_ssbi_pm8821_pdata;
+	impression_j_pm8921_platform_data.num_regulators =
+					impression_j_pm8921_regulator_pdata_len;
 
 }

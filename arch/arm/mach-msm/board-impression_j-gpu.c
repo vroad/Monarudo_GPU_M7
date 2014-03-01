@@ -19,7 +19,7 @@
 #include <mach/msm_dcvs.h>
 
 #include "devices.h"
-#include "board-deluxe_j.h"
+#include "board-impression_j.h"
 
 #ifdef CONFIG_MSM_DCVS
 static struct msm_dcvs_freq_entry grp3d_freq[] = {
@@ -215,7 +215,7 @@ static struct kgsl_device_platform_data kgsl_3d0_pdata = {
 			.bus_freq = 0,
 		},
 	},
-	.init_level = 2,
+	.init_level = 1,
 	.num_levels = 4,
 	.set_grp_async = NULL,
 	.idle_timeout = HZ/10,
@@ -242,7 +242,7 @@ static struct platform_device device_kgsl_3d0 = {
 	},
 };
 
-void __init deluxe_j_init_gpu(void)
+void __init impression_j_init_gpu(void)
 {
 	platform_device_register(&device_kgsl_3d0);
 }

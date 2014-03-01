@@ -22,7 +22,7 @@
 #include <asm/mach-types.h>
 #include <linux/mfd/pm8xxx/pm8921.h>
 
-#include "board-deluxe_j.h"
+#include "board-impression_j.h"
 
 static struct rfkill *bt_rfk;
 static const char bt_name[] = "bcm4334";
@@ -49,7 +49,7 @@ struct pm8xxx_gpio_init {
 	} \
 }
 
-struct pm8xxx_gpio_init deluxe_j_bt_pmic_gpio[] = {
+struct pm8xxx_gpio_init impression_j_bt_pmic_gpio[] = {
 	PM8XXX_GPIO_INIT(BT_REG_ON, PM_GPIO_DIR_OUT, PM_GPIO_OUT_BUF_CMOS, 0, \
 				PM_GPIO_PULL_NO, PM_GPIO_VIN_S4, \
 				PM_GPIO_STRENGTH_LOW, \
@@ -65,7 +65,7 @@ struct pm8xxx_gpio_init deluxe_j_bt_pmic_gpio[] = {
 };
 
 
-static uint32_t deluxe_j_GPIO_bt_on_table[] = {
+static uint32_t impression_j_GPIO_bt_on_table[] = {
 
 	
 	GPIO_CFG(BT_UART_RTSz,
@@ -93,7 +93,7 @@ static uint32_t deluxe_j_GPIO_bt_on_table[] = {
 				GPIO_CFG_8MA),
 };
 
-static uint32_t deluxe_j_GPIO_bt_off_table[] = {
+static uint32_t impression_j_GPIO_bt_off_table[] = {
 
 	
 	GPIO_CFG(BT_UART_RTSz,
@@ -134,13 +134,13 @@ static void config_bt_table(uint32_t *table, int len)
 	}
 }
 
-static void deluxe_j_GPIO_config_bt_on(void)
+static void impression_j_GPIO_config_bt_on(void)
 {
 	printk(KERN_INFO "[BT]== R ON ==\n");
 
 	
-	config_bt_table(deluxe_j_GPIO_bt_on_table,
-				ARRAY_SIZE(deluxe_j_GPIO_bt_on_table));
+	config_bt_table(impression_j_GPIO_bt_on_table,
+				ARRAY_SIZE(impression_j_GPIO_bt_on_table));
 	mdelay(2);
 
 
@@ -159,7 +159,7 @@ static void deluxe_j_GPIO_config_bt_on(void)
 
 }
 
-static void deluxe_j_GPIO_config_bt_off(void)
+static void impression_j_GPIO_config_bt_off(void)
 {
 
 	
@@ -167,8 +167,8 @@ static void deluxe_j_GPIO_config_bt_off(void)
 	mdelay(1);
 
 	
-	config_bt_table(deluxe_j_GPIO_bt_off_table,
-				ARRAY_SIZE(deluxe_j_GPIO_bt_off_table));
+	config_bt_table(impression_j_GPIO_bt_off_table,
+				ARRAY_SIZE(impression_j_GPIO_bt_off_table));
 	mdelay(2);
 
 	
@@ -193,18 +193,18 @@ static void deluxe_j_GPIO_config_bt_off(void)
 static int bluetooth_set_power(void *data, bool blocked)
 {
 	if (!blocked)
-		deluxe_j_GPIO_config_bt_on();
+		impression_j_GPIO_config_bt_on();
 	else
-		deluxe_j_GPIO_config_bt_off();
+		impression_j_GPIO_config_bt_off();
 
 	return 0;
 }
 
-static struct rfkill_ops deluxe_j_rfkill_ops = {
+static struct rfkill_ops impression_j_rfkill_ops = {
 	.set_block = bluetooth_set_power,
 };
 
-static int deluxe_j_rfkill_probe(struct platform_device *pdev)
+static int impression_j_rfkill_probe(struct platform_device *pdev)
 {
 	int rc = 0;
 	bool default_state = true;  
@@ -214,18 +214,18 @@ static int deluxe_j_rfkill_probe(struct platform_device *pdev)
 	
 	mdelay(2);
 
-	for( i = 0; i < ARRAY_SIZE(deluxe_j_bt_pmic_gpio); i++) {
-		rc = pm8xxx_gpio_config(deluxe_j_bt_pmic_gpio[i].gpio,
-					&deluxe_j_bt_pmic_gpio[i].config);
+	for( i = 0; i < ARRAY_SIZE(impression_j_bt_pmic_gpio); i++) {
+		rc = pm8xxx_gpio_config(impression_j_bt_pmic_gpio[i].gpio,
+					&impression_j_bt_pmic_gpio[i].config);
 		if (rc)
 			pr_info("[bt] %s: Config ERROR: GPIO=%u, rc=%d\n",
-				__func__, deluxe_j_bt_pmic_gpio[i].gpio, rc);
+				__func__, impression_j_bt_pmic_gpio[i].gpio, rc);
 	}
 
 	bluetooth_set_power(NULL, default_state);
 
 	bt_rfk = rfkill_alloc(bt_name, &pdev->dev, RFKILL_TYPE_BLUETOOTH,
-				&deluxe_j_rfkill_ops, NULL);
+				&impression_j_rfkill_ops, NULL);
 	if (!bt_rfk) {
 		rc = -ENOMEM;
 		goto err_rfkill_alloc;
@@ -247,34 +247,34 @@ err_rfkill_alloc:
 	return rc;
 }
 
-static int deluxe_j_rfkill_remove(struct platform_device *dev)
+static int impression_j_rfkill_remove(struct platform_device *dev)
 {
 	rfkill_unregister(bt_rfk);
 	rfkill_destroy(bt_rfk);
 	return 0;
 }
 
-static struct platform_driver deluxe_j_rfkill_driver = {
-	.probe = deluxe_j_rfkill_probe,
-	.remove = deluxe_j_rfkill_remove,
+static struct platform_driver impression_j_rfkill_driver = {
+	.probe = impression_j_rfkill_probe,
+	.remove = impression_j_rfkill_remove,
 	.driver = {
-		.name = "deluxe_j_rfkill",
+		.name = "impression_j_rfkill",
 		.owner = THIS_MODULE,
 	},
 };
 
-static int __init deluxe_j_rfkill_init(void)
+static int __init impression_j_rfkill_init(void)
 {
-	return platform_driver_register(&deluxe_j_rfkill_driver);
+	return platform_driver_register(&impression_j_rfkill_driver);
 }
 
-static void __exit deluxe_j_rfkill_exit(void)
+static void __exit impression_j_rfkill_exit(void)
 {
-	platform_driver_unregister(&deluxe_j_rfkill_driver);
+	platform_driver_unregister(&impression_j_rfkill_driver);
 }
 
-module_init(deluxe_j_rfkill_init);
-module_exit(deluxe_j_rfkill_exit);
-MODULE_DESCRIPTION("deluxe_j rfkill");
+module_init(impression_j_rfkill_init);
+module_exit(impression_j_rfkill_exit);
+MODULE_DESCRIPTION("impression_j rfkill");
 MODULE_AUTHOR("htc_ssdbt <htc_ssdbt@htc.com>");
 MODULE_LICENSE("GPL");

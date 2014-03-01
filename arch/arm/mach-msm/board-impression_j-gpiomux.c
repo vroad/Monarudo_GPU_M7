@@ -23,7 +23,7 @@
 #include <mach/gpiomux.h>
 #include <mach/socinfo.h>
 #include "devices.h"
-#include "board-deluxe_j.h"
+#include "board-impression_j.h"
 
 
 static struct gpiomux_setting  mi2s_rx_sclk = {
@@ -138,7 +138,7 @@ static struct gpiomux_setting gpio_spi_cs_config = {
 	.pull = GPIOMUX_PULL_UP,
 };
 
-struct msm_gpiomux_config deluxe_j_ethernet_configs[] = {
+struct msm_gpiomux_config impression_j_ethernet_configs[] = {
 };
 #endif
 
@@ -199,6 +199,12 @@ static struct gpiomux_setting gpio_i2c_config = {
 static struct gpiomux_setting gpio_i2c_config_sus = {
 	.func = GPIOMUX_FUNC_1,
 	.drv = GPIOMUX_DRV_2MA,
+	.pull = GPIOMUX_PULL_KEEPER,
+};
+
+static struct gpiomux_setting gpio_i2c_config_sus_2 = {
+	.func = GPIOMUX_FUNC_1,
+	.drv = GPIOMUX_DRV_8MA,
 	.pull = GPIOMUX_PULL_KEEPER,
 };
 
@@ -314,6 +320,7 @@ static struct gpiomux_setting hsic_wakeup_sus_cfg = {
 	.dir = GPIOMUX_IN,
 };
 
+
 #if 0
 static struct gpiomux_setting cyts_resout_sus_cfg = {
 	.func = GPIOMUX_FUNC_GPIO,
@@ -374,7 +381,7 @@ static struct msm_gpiomux_config cyts_gpio_configs[] __initdata = {
 	},
 };
 #endif
-static struct msm_gpiomux_config deluxe_j_hsic_configs[] = {
+static struct msm_gpiomux_config impression_j_hsic_configs[] = {
 	{
 		.gpio = 88,               
 		.settings = {
@@ -484,13 +491,13 @@ static struct gpiomux_setting hdmi_suspend_pd_cfg = {
 
 static struct gpiomux_setting hdmi_suspend_np_cfg = {
 	.func = GPIOMUX_FUNC_GPIO,
-	.drv = GPIOMUX_DRV_2MA,
+	.drv = GPIOMUX_DRV_6MA,
 	.pull = GPIOMUX_PULL_NONE,
 };
 
 static struct gpiomux_setting hdmi_active_1_cfg = {
 	.func = GPIOMUX_FUNC_1,
-	.drv = GPIOMUX_DRV_2MA,
+	.drv = GPIOMUX_DRV_6MA,
 	.pull = GPIOMUX_PULL_UP,
 };
 
@@ -525,18 +532,18 @@ static struct msm_gpiomux_config hdmi_configs[] __initdata = {
 };
 #endif
 
-static struct msm_gpiomux_config deluxe_j_gsbi_configs[] __initdata = {
+static struct msm_gpiomux_config impression_j_gsbi_configs[] __initdata = {
 	{
 		.gpio      = 21,		
 		.settings = {
-			[GPIOMUX_SUSPENDED] = &gpio_i2c_config_sus,
+			[GPIOMUX_SUSPENDED] = &gpio_i2c_config_sus_2,
 			[GPIOMUX_ACTIVE] = &gpio_i2c_config,
 		},
 	},
 	{
 		.gpio      = 20,		
 		.settings = {
-			[GPIOMUX_SUSPENDED] = &gpio_i2c_config_sus,
+			[GPIOMUX_SUSPENDED] = &gpio_i2c_config_sus_2,
 			[GPIOMUX_ACTIVE] = &gpio_i2c_config,
 		},
 	},
@@ -685,7 +692,7 @@ static struct msm_gpiomux_config deluxe_j_gsbi_configs[] __initdata = {
 	},
 };
 
-static struct msm_gpiomux_config deluxe_j_slimbus_config[] __initdata = {
+static struct msm_gpiomux_config impression_j_slimbus_config[] __initdata = {
 	{
 		.gpio   = 40,           
 		.settings = {
@@ -700,7 +707,7 @@ static struct msm_gpiomux_config deluxe_j_slimbus_config[] __initdata = {
 	},
 };
 
-static struct msm_gpiomux_config deluxe_j_audio_codec_configs[] __initdata = {
+static struct msm_gpiomux_config impression_j_audio_codec_configs[] __initdata = {
 	{
 		.gpio = 39,
 		.settings = {
@@ -717,9 +724,9 @@ static struct msm_gpiomux_config deluxe_j_audio_codec_configs[] __initdata = {
 };
 
 #if 0
-static struct msm_gpiomux_config deluxe_j_ext_regulator_configs[] __initdata = {
+static struct msm_gpiomux_config impression_j_ext_regulator_configs[] __initdata = {
 	{
-		.gpio = deluxe_j_EXT_3P3V_REG_EN_GPIO,
+		.gpio = impression_j_EXT_3P3V_REG_EN_GPIO,
 		.settings = {
 			[GPIOMUX_SUSPENDED] = &ext_regulator_config,
 		},
@@ -804,7 +811,7 @@ static struct gpiomux_setting gpio_rotate_key_sus_config = {
 	.func = GPIOMUX_FUNC_GPIO,
 };
 
-struct msm_gpiomux_config deluxe_j_rotate_key_config[] = {
+struct msm_gpiomux_config impression_j_rotate_key_config[] = {
 	{
 		.gpio = 46,
 		.settings = {
@@ -814,7 +821,7 @@ struct msm_gpiomux_config deluxe_j_rotate_key_config[] = {
 	},
 };
 #if 0
-static struct msm_gpiomux_config deluxe_j_mxt_configs[] __initdata = {
+static struct msm_gpiomux_config impression_j_mxt_configs[] __initdata = {
 	{	
 		.gpio = 6,
 		.settings = {
@@ -856,7 +863,7 @@ static struct msm_gpiomux_config wcnss_5wire_interface[] = {
 	},
 };
 #endif
-void __init deluxe_j_init_gpiomux(void)
+void __init impression_j_init_gpiomux(void)
 {
 	int rc;
 
@@ -867,21 +874,21 @@ void __init deluxe_j_init_gpiomux(void)
 	}
 
 #if defined(CONFIG_KS8851) || defined(CONFIG_KS8851_MODULE)
-	msm_gpiomux_install(deluxe_j_ethernet_configs,
-			ARRAY_SIZE(deluxe_j_ethernet_configs));
+	msm_gpiomux_install(impression_j_ethernet_configs,
+			ARRAY_SIZE(impression_j_ethernet_configs));
 #endif
 #if 0
 	msm_gpiomux_install(wcnss_5wire_interface,
 			ARRAY_SIZE(wcnss_5wire_interface));
 #endif
-	msm_gpiomux_install(deluxe_j_gsbi_configs,
-			ARRAY_SIZE(deluxe_j_gsbi_configs));
+	msm_gpiomux_install(impression_j_gsbi_configs,
+			ARRAY_SIZE(impression_j_gsbi_configs));
 
-	msm_gpiomux_install(deluxe_j_slimbus_config,
-			ARRAY_SIZE(deluxe_j_slimbus_config));
+	msm_gpiomux_install(impression_j_slimbus_config,
+			ARRAY_SIZE(impression_j_slimbus_config));
 
-	msm_gpiomux_install(deluxe_j_audio_codec_configs,
-			ARRAY_SIZE(deluxe_j_audio_codec_configs));
+	msm_gpiomux_install(impression_j_audio_codec_configs,
+			ARRAY_SIZE(impression_j_audio_codec_configs));
 
 	msm_gpiomux_install(msm8960_mi2s_rx_configs,
 		ARRAY_SIZE(msm8960_mi2s_rx_configs));
@@ -907,8 +914,8 @@ void __init deluxe_j_init_gpiomux(void)
 #endif
 
 #ifdef CONFIG_USB_EHCI_MSM_HSIC
-	msm_gpiomux_install(deluxe_j_hsic_configs,
-		ARRAY_SIZE(deluxe_j_hsic_configs));
+	msm_gpiomux_install(impression_j_hsic_configs,
+		ARRAY_SIZE(impression_j_hsic_configs));
 #endif
 
 }

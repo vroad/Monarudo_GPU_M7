@@ -13,23 +13,68 @@
  * GNU General Public License for more details.
  */
 
-#include <asm/mach-types.h>
 #include <linux/platform_device.h>
-#include <mach/htc_acoustic_8960.h>
 #include <sound/pcm.h>
 #include <sound/q6asm.h>
+#include <mach/htc_acoustic_8960.h>
 #include <linux/module.h>
-#include "board-deluxe_j.h"
+#include "board-impression_j.h"
 #include "../sound/soc/msm/msm-pcm-routing.h"
-
 #include <linux/gpio.h>
 #include <mach/tpa6185.h>
 #include <mach/rt5501.h>
-#define HAC_PAMP_GPIO	6
 static atomic_t q6_effect_mode = ATOMIC_INIT(-1);
+#define HAC_PAMP_GPIO	6
+static struct regulator *reg_8921_lvs2;
 extern unsigned int system_rev;
 
-static int deluxej_get_hw_component(void)
+static int power_on_amp(char *power, struct regulator **regul)
+{
+	int rc;
+
+	if (power == NULL)
+		return -ENODEV;
+
+	*regul = regulator_get(NULL, power);
+
+	if (IS_ERR(*regul)) {
+		pr_info("%s: failed to get %s\n", __func__, power);
+		return -ENODEV;
+	}
+
+	rc = regulator_enable(*regul);
+	if (rc < 0) {
+		pr_info("%s: failed to Enable regulator %s failed\n", __func__, power);
+		regulator_put(*regul);
+		*regul = NULL;
+		return -ENODEV;
+	}
+
+	return rc;
+}
+
+static int power_off_amp(struct regulator *regul)
+{
+
+	int rc;
+	if (regul == NULL)
+		return -ENODEV;
+
+	if (IS_ERR(regul)) {
+		pr_info(" %s: Invalid requlator ptr\n", __func__);
+		return -ENODEV;
+	}
+
+	rc = regulator_disable(regul);
+	if (rc < 0)
+		pr_info("%s: disable regulator failed\n", __func__);
+
+	regulator_put(regul);
+	regul = NULL;
+	return rc;
+}
+
+static int impression_get_hw_component(void)
 {
     int hw_com = 0;
 
@@ -42,12 +87,9 @@ static int deluxej_get_hw_component(void)
     return hw_com;
 }
 
-static int deluxej_enable_digital_mic(void)
+static int impression_enable_digital_mic(void)
 {
-	if(system_rev >= XC)
-		return 1;
-	else
-		return 0;
+    return 0;
 }
 
 void apq8064_set_q6_effect_mode(int mode)
@@ -64,9 +106,9 @@ int apq8064_get_q6_effect_mode(void)
 }
 
 static struct acoustic_ops acoustic = {
-        .enable_digital_mic = deluxej_enable_digital_mic,
-        .get_hw_component = deluxej_get_hw_component,
-	.set_q6_effect = apq8064_set_q6_effect_mode
+        .enable_digital_mic = impression_enable_digital_mic,
+        .get_hw_component = impression_get_hw_component,
+	.set_q6_effect = apq8064_set_q6_effect_mode,
 };
 
 static struct q6asm_ops qops = {
@@ -77,7 +119,7 @@ static struct msm_pcm_routing_ops rops = {
 	.get_q6_effect = apq8064_get_q6_effect_mode,
 };
 
-static int __init deluxe_j_audio_init(void)
+static int __init impression_j_audio_init(void)
 {
         int ret = 0;
 
@@ -94,20 +136,21 @@ static int __init deluxe_j_audio_init(void)
 	gpio_tlmm_config(audio_i2s_table[1], GPIO_CFG_DISABLE);
 	gpio_tlmm_config(audio_i2s_table[2], GPIO_CFG_DISABLE);
 
+        power_on_amp("8921_lvs2", &reg_8921_lvs2);
 	htc_register_q6asm_ops(&qops);
 	htc_register_pcm_routing_ops(&rops);
 	acoustic_register_ops(&acoustic);
-
 	return ret;
 
 }
-late_initcall(deluxe_j_audio_init);
+late_initcall(impression_j_audio_init);
 
-static void __exit deluxe_j_audio_exit(void)
+static void __exit impression_j_audio_exit(void)
 {
 	pr_info("%s", __func__);
+        power_off_amp(reg_8921_lvs2);
 }
-module_exit(deluxe_j_audio_exit);
+module_exit(impression_j_audio_exit);
 
 MODULE_DESCRIPTION("ALSA Platform Elite");
 MODULE_LICENSE("GPL v2");

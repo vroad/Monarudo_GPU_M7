@@ -1,4 +1,4 @@
-/* linux/arch/arm/mach-msm/board-deluxe_j-wifi.h
+/* linux/arch/arm/mach-msm/board-impression_j-wifi.h
  *
  * Copyright (C) 2008 HTC Corporation.
  *

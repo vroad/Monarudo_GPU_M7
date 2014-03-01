@@ -10,13 +10,13 @@
 #include <linux/wifi_tiwlan.h>
 #include <mach/msm_bus_board.h>
 
-#include "board-deluxe_j.h"
-#include "board-deluxe_j-wifi.h"
+#include "board-impression_j.h"
+#include "board-impression_j-wifi.h"
 
-int deluxe_j_wifi_power(int on);
-int deluxe_j_wifi_reset(int on);
-int deluxe_j_wifi_set_carddetect(int on);
-int deluxe_j_wifi_get_mac_addr(unsigned char *buf);
+int impression_j_wifi_power(int on);
+int impression_j_wifi_reset(int on);
+int impression_j_wifi_set_carddetect(int on);
+int impression_j_wifi_get_mac_addr(unsigned char *buf);
 
 #define PREALLOC_WLAN_NUMBER_OF_SECTIONS	4
 #define PREALLOC_WLAN_NUMBER_OF_BUFFERS		160
@@ -45,7 +45,7 @@ static wifi_mem_prealloc_t wifi_mem_array[PREALLOC_WLAN_NUMBER_OF_SECTIONS] = {
 	{ NULL, (WLAN_SECTION_SIZE_3 + PREALLOC_WLAN_SECTION_HEADER) }
 };
 
-static void *deluxe_j_wifi_mem_prealloc(int section, unsigned long size)
+static void *impression_j_wifi_mem_prealloc(int section, unsigned long size)
 {
 	if (section == PREALLOC_WLAN_NUMBER_OF_SECTIONS)
 		return wlan_static_skb;
@@ -56,7 +56,7 @@ static void *deluxe_j_wifi_mem_prealloc(int section, unsigned long size)
 	return wifi_mem_array[section].mem_ptr;
 }
 
-int __init deluxe_j_init_wifi_mem(void)
+int __init impression_j_init_wifi_mem(void)
 {
 	int i;
 
@@ -75,7 +75,7 @@ int __init deluxe_j_init_wifi_mem(void)
 	return 0;
 }
 
-static struct resource deluxe_j_wifi_resources[] = {
+static struct resource impression_j_wifi_resources[] = {
 	[0] = {
 		.name		= "bcmdhd_wlan_irq",
 		.start		= PM8921_GPIO_IRQ(PM8921_IRQ_BASE, WL_HOST_WAKE),
@@ -123,26 +123,26 @@ static struct msm_bus_scale_pdata wlan_bus_scale_pdata = {
        .name = "wlan",
 };
 
-static struct wifi_platform_data deluxe_j_wifi_control = {
-	.set_power      = deluxe_j_wifi_power,
-	.set_reset      = deluxe_j_wifi_reset,
-	.set_carddetect = deluxe_j_wifi_set_carddetect,
-	.mem_prealloc   = deluxe_j_wifi_mem_prealloc,
-	.get_mac_addr	= deluxe_j_wifi_get_mac_addr,
+static struct wifi_platform_data impression_j_wifi_control = {
+	.set_power      = impression_j_wifi_power,
+	.set_reset      = impression_j_wifi_reset,
+	.set_carddetect = impression_j_wifi_set_carddetect,
+	.mem_prealloc   = impression_j_wifi_mem_prealloc,
+	.get_mac_addr	= impression_j_wifi_get_mac_addr,
 	.bus_scale_table        = &wlan_bus_scale_pdata,
 };
 
-static struct platform_device deluxe_j_wifi_device = {
+static struct platform_device impression_j_wifi_device = {
 	.name           = "bcmdhd_wlan",
 	.id             = 1,
-	.num_resources  = ARRAY_SIZE(deluxe_j_wifi_resources),
-	.resource       = deluxe_j_wifi_resources,
+	.num_resources  = ARRAY_SIZE(impression_j_wifi_resources),
+	.resource       = impression_j_wifi_resources,
 	.dev            = {
-		.platform_data = &deluxe_j_wifi_control,
+		.platform_data = &impression_j_wifi_control,
 	},
 };
 
-static unsigned deluxe_j_wifi_update_nvs(char *str)
+static unsigned impression_j_wifi_update_nvs(char *str)
 {
 #define NVS_LEN_OFFSET		0x0C
 #define NVS_DATA_OFFSET		0x40
@@ -264,7 +264,7 @@ get_mac_from_wifi_nvs_ram(char *buf, unsigned int buf_len)
 }
 
 #define ETHER_ADDR_LEN 6
-int deluxe_j_wifi_get_mac_addr(unsigned char *buf)
+int impression_j_wifi_get_mac_addr(unsigned char *buf)
 {
 	static u8 ether_mac_addr[] = {0x00, 0x11, 0x22, 0x33, 0x44, 0xFF};
 	char mac[WIFI_MAX_MAC_LEN];
@@ -286,13 +286,13 @@ int deluxe_j_wifi_get_mac_addr(unsigned char *buf)
 
 	memcpy(buf, ether_mac_addr, sizeof(ether_mac_addr));
 
-	printk(KERN_INFO"deluxe_j_wifi_get_mac_addr = %02x %02x %02x %02x %02x %02x \n",
+	printk(KERN_INFO"impression_j_wifi_get_mac_addr = %02x %02x %02x %02x %02x %02x \n",
 		ether_mac_addr[0], ether_mac_addr[1], ether_mac_addr[2], ether_mac_addr[3], ether_mac_addr[4], ether_mac_addr[5]);
 
 	return 0;
 }
 
-int __init deluxe_j_wifi_init(void)
+int __init impression_j_wifi_init(void)
 {
 	int ret;
 
@@ -300,12 +300,12 @@ int __init deluxe_j_wifi_init(void)
 #ifdef HW_OOB
 	strip_nvs_param("sd_oobonly");
 #else
-	deluxe_j_wifi_update_nvs("sd_oobonly=1\n");
+	impression_j_wifi_update_nvs("sd_oobonly=1\n");
 #endif
-	deluxe_j_wifi_update_nvs("btc_params80=0\n");
-	deluxe_j_wifi_update_nvs("btc_params6=30\n");
-	deluxe_j_init_wifi_mem();
-	ret = platform_device_register(&deluxe_j_wifi_device);
+	impression_j_wifi_update_nvs("btc_params80=0\n");
+	impression_j_wifi_update_nvs("btc_params6=30\n");
+	impression_j_init_wifi_mem();
+	ret = platform_device_register(&impression_j_wifi_device);
 	return ret;
 }
 

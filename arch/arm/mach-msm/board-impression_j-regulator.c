@@ -13,7 +13,7 @@
 
 #include <linux/regulator/pm8xxx-regulator.h>
 
-#include "board-deluxe_j.h"
+#include "board-impression_j.h"
 
 #define VREG_CONSUMERS(_id) \
 	static struct regulator_consumer_supply vreg_consumers_##_id[]
@@ -25,7 +25,7 @@ VREG_CONSUMERS(L2) = {
 	REGULATOR_SUPPLY("8921_l2",		NULL),
 	REGULATOR_SUPPLY("mipi_csi_vdd",	"msm_csiphy.0"),
 	REGULATOR_SUPPLY("mipi_csi_vdd",	"msm_csiphy.1"),
-	REGULATOR_SUPPLY("mipi_csi_vdd",        "msm_csiphy.2"),
+        REGULATOR_SUPPLY("mipi_csi_vdd",        "msm_csiphy.2"),
 	REGULATOR_SUPPLY("lvds_pll_vdda",	"lvds.0"),
 	REGULATOR_SUPPLY("dsi1_pll_vdda",	"mipi_dsi.1"),
 };
@@ -66,6 +66,7 @@ VREG_CONSUMERS(L9) = {
 VREG_CONSUMERS(L10) = {
 	REGULATOR_SUPPLY("8921_l10",		NULL),
 	REGULATOR_SUPPLY("iris_vddpa",		"wcnss_wlan.0"),
+        REGULATOR_SUPPLY("dsi1_avdd",           "mipi_dsi.1"),
 };
 VREG_CONSUMERS(L11) = {
 	REGULATOR_SUPPLY("8921_l11",		NULL),
@@ -462,7 +463,7 @@ VREG_CONSUMERS(EXT_TS_SW) = {
 	}
 
 struct gpio_regulator_platform_data
-deluxe_j_gpio_regulator_pdata[] __devinitdata = {
+impression_j_gpio_regulator_pdata[] __devinitdata = {
 	
 	GPIO_VREG(EXT_5V, "ext_5v", "ext_5v_en", PM8921_MPP_PM_TO_SYS(7), NULL),
 	
@@ -473,20 +474,20 @@ deluxe_j_gpio_regulator_pdata[] __devinitdata = {
 			PM8921_MPP_PM_TO_SYS(8), NULL),
 };
 
-struct regulator_init_data deluxe_j_saw_regulator_pdata_8921_s5 =
+struct regulator_init_data impression_j_saw_regulator_pdata_8921_s5 =
 	
 	SAW_VREG_INIT(S5, "8921_s5",	       850000, 1300000);
-struct regulator_init_data deluxe_j_saw_regulator_pdata_8921_s6 =
+struct regulator_init_data impression_j_saw_regulator_pdata_8921_s6 =
 	SAW_VREG_INIT(S6, "8921_s6",	       850000, 1300000);
 
-struct regulator_init_data deluxe_j_saw_regulator_pdata_8821_s0 =
+struct regulator_init_data impression_j_saw_regulator_pdata_8821_s0 =
 	
 	SAW_VREG_INIT(8821_S0, "8821_s0",       850000, 1300000);
-struct regulator_init_data deluxe_j_saw_regulator_pdata_8821_s1 =
+struct regulator_init_data impression_j_saw_regulator_pdata_8821_s1 =
 	SAW_VREG_INIT(8821_S1, "8821_s1",       850000, 1300000);
 
 struct pm8xxx_regulator_platform_data
-deluxe_j_pm8921_regulator_pdata[] __devinitdata = {
+impression_j_pm8921_regulator_pdata[] __devinitdata = {
 	PM8XXX_NLDO1200(L26, "8921_l26", 0, 1, 375000, 1050000, 200, "8921_s7",
 		0, 1),
 
@@ -496,7 +497,7 @@ deluxe_j_pm8921_regulator_pdata[] __devinitdata = {
 };
 
 static struct rpm_regulator_init_data
-deluxe_j_rpm_regulator_init_data[] __devinitdata = {
+impression_j_rpm_regulator_init_data[] __devinitdata = {
 	
 	RPM_SMPS(S1, 1, 1, 0, 1225000, 1225000, NULL, 100000, 3p20, NONE, NONE),
 	RPM_SMPS(S2, 0, 0, 0, 1300000, 1300000, NULL,      0, 1p60, NONE, NONE),
@@ -515,21 +516,21 @@ deluxe_j_rpm_regulator_init_data[] __devinitdata = {
 	RPM_LDO(L7,  0, 1, 0, 1850000, 2950000, NULL,          0,     0),
 	RPM_LDO(L8,  0, 1, 0, 2800000, 2800000, NULL,          0,     0),
 	RPM_LDO(L9,  0, 1, 0, 2800000, 2800000, NULL,          0,     0),
-	RPM_LDO(L10, 0, 1, 0, 2900000, 2900000, NULL,          0,     0),
+	RPM_LDO(L10, 0, 1, 0, 3000000, 3000000, NULL,          0,     0),
 	RPM_LDO(L11, 0, 1, 0, 3300000, 3300000, NULL,          0,     0),
 	RPM_LDO(L12, 0, 1, 0, 1200000, 1200000, "8921_s4",     0,     0),
 	RPM_LDO(L14, 0, 1, 0, 1800000, 1800000, NULL,          0,     0),
 	RPM_LDO(L15, 0, 1, 0, 1800000, 2950000, NULL,          0,     0),
 	RPM_LDO(L16, 0, 1, 0, 3300000, 3300000, NULL,          0,     0),
 	RPM_LDO(L17, 0, 1, 0, 2000000, 2000000, NULL,          0,     0),
-	RPM_LDO(L18, 0, 1, 0, 1300000, 1800000, "8921_s4",     0,     0),
+	RPM_LDO(L18, 1, 1, 0, 1300000, 1300000, "8921_s4",     0,     0),
 	RPM_LDO(L21, 0, 1, 0, 1050000, 1050000, NULL,          0,     0),
 	RPM_LDO(L22, 0, 1, 0, 2600000, 2600000, NULL,          0,     0),
-	RPM_LDO(L23, 0, 1, 0, 1800000, 1800000, NULL,          0,     0),
+	RPM_LDO(L23, 0, 1, 0, 1850000, 1850000, NULL,          0,     0),
 	RPM_LDO(L24, 0, 1, 1,  750000, 1150000, "8921_s1", 10000, 10000),
 	RPM_LDO(L25, 1, 1, 0, 1250000, 1250000, "8921_s1", 10000, 10000),
 	RPM_LDO(L27, 0, 0, 0, 1100000, 1100000, "8921_s7",     0,     0),
-	RPM_LDO(L28, 0, 1, 0, 1050000, 1050000, "8921_s7",     0,     0),
+	RPM_LDO(L28, 0, 1, 0, 1050000, 1200000, "8921_s7",     0,     0),
 	RPM_LDO(L29, 0, 1, 0, 2000000, 2000000, NULL,          0,     0),
 
 	
@@ -545,12 +546,12 @@ deluxe_j_rpm_regulator_init_data[] __devinitdata = {
 	RPM_NCP(NCP, 0,    0, 1800000, 1800000, "8921_l6", 1p60),
 };
 
-int deluxe_j_pm8921_regulator_pdata_len __devinitdata =
-	ARRAY_SIZE(deluxe_j_pm8921_regulator_pdata);
+int impression_j_pm8921_regulator_pdata_len __devinitdata =
+	ARRAY_SIZE(impression_j_pm8921_regulator_pdata);
 
-struct rpm_regulator_platform_data deluxe_j_rpm_regulator_pdata __devinitdata = {
-	.init_data		= deluxe_j_rpm_regulator_init_data,
-	.num_regulators		= ARRAY_SIZE(deluxe_j_rpm_regulator_init_data),
+struct rpm_regulator_platform_data impression_j_rpm_regulator_pdata __devinitdata = {
+	.init_data		= impression_j_rpm_regulator_init_data,
+	.num_regulators		= ARRAY_SIZE(impression_j_rpm_regulator_init_data),
 	.version		= RPM_VREG_VERSION_8960,
 	.vreg_id_vdd_mem	= RPM_VREG_ID_PM8921_L24,
 	.vreg_id_vdd_dig	= RPM_VREG_ID_PM8921_S3,
