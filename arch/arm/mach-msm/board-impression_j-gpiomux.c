@@ -248,7 +248,7 @@ static struct gpiomux_setting ext_regulator_config = {
 };
 #endif
 
-#ifdef CONFIG_SERIAL_IRDA
+#if defined(CONFIG_SERIAL_IRDA) || defined(CONFIG_SERIAL_CIR)
 static struct gpiomux_setting gsbi3_func1_cfg = {
 	.func = GPIOMUX_FUNC_1,
 	.drv = GPIOMUX_DRV_8MA,
@@ -563,7 +563,7 @@ static struct msm_gpiomux_config impression_j_gsbi_configs[] __initdata = {
 		},
 	},
 
-#ifdef CONFIG_SERIAL_IRDA
+#if defined(CONFIG_SERIAL_IRDA) || defined(CONFIG_SERIAL_CIR)
 	{
 		.gpio      = 6,			
 		.settings = {

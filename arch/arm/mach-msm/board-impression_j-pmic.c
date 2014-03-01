@@ -462,7 +462,7 @@ pm8921_chg_pdata __devinitdata = {
 	.cool_temp		= 0,
 	.warm_temp		= 48,
 	.temp_check_period	= 1,
-	.max_bat_chg_current	= 1025,
+	.max_bat_chg_current	= 1525,
 	.cool_bat_chg_current	= 1025,
 	.warm_bat_chg_current	= 1025,
 	.cool_bat_voltage	= 4200,
@@ -488,6 +488,8 @@ pm8921_bms_pdata __devinitdata = {
 	.v_failure		= 3000,
 	.max_voltage_uv		= MAX_VOLTAGE_MV * 1000,
 	.rconn_mohm		= 0,
+	.criteria_sw_est_ocv			= 86400000, 
+	.rconn_mohm_sw_est_ocv		= 10,
 };
 
 static int __init check_dq_setup(char *str)

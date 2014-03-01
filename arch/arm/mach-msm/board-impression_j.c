@@ -130,18 +130,14 @@
 #ifdef CONFIG_SUPPORT_USB_SPEAKER
 #include <linux/pm_qos.h>
 #endif
-#ifdef CONFIG_SERIAL_IRDA
+#if defined(CONFIG_SERIAL_IRDA) || defined(CONFIG_SERIAL_CIR)
 #include <linux/htc_irda.h>
 #endif
 
 
-#define MSM_PMEM_ADSP_SIZE         0x4700000
+#define MSM_PMEM_ADSP_SIZE         0x8600000
 #define MSM_PMEM_AUDIO_SIZE        0x4CF000
-#ifdef CONFIG_FB_MSM_HDMI_AS_PRIMARY
-#define MSM_PMEM_SIZE 0x4000000 
-#else
-#define MSM_PMEM_SIZE 0x4000000 
-#endif
+#define MSM_PMEM_SIZE              0x0 
 
 #ifdef CONFIG_MSM_MULTIMEDIA_USE_ION
 #define HOLE_SIZE		0x20000
@@ -151,6 +147,8 @@
 #define MSM_PMEM_KERNEL_EBI1_SIZE  0x6400000
 #endif
 
+#define MSM_ION_KGSL_SIZE	0x0
+#define MSM_ION_SF_SIZE		(MSM_PMEM_SIZE + MSM_ION_KGSL_SIZE)
 #define MSM_ION_MM_FW_SIZE	(0x200000 - HOLE_SIZE) 
 #define MSM_ION_MM_SIZE		MSM_PMEM_ADSP_SIZE
 #define MSM_ION_QSECOM_SIZE	0x600000 
@@ -254,6 +252,8 @@ enum {
 #ifdef CONFIG_CPU_FREQ_GOV_ONDEMAND_2_PHASE
 int set_two_phase_freq(int cpufreq);
 #endif
+
+int set_input_event_min_freq_by_cpu(int cpu_nr, int cpufreq);
 
 #ifdef CONFIG_KERNEL_PMEM_EBI_REGION
 static unsigned pmem_kernel_ebi1_size = MSM_PMEM_KERNEL_EBI1_SIZE;
@@ -1000,7 +1000,8 @@ static int critical_alarm_voltage_mv[] = {3000, 3200, 3400};
 static struct htc_battery_platform_data htc_battery_pdev_data = {
 	.guage_driver = 0,
 	.chg_limit_active_mask = HTC_BATT_CHG_LIMIT_BIT_TALK |
-								HTC_BATT_CHG_LIMIT_BIT_NAVI,
+								HTC_BATT_CHG_LIMIT_BIT_NAVI |
+								HTC_BATT_CHG_LIMIT_BIT_THRML,
 	.critical_low_voltage_mv = 3100,
 	.critical_alarm_vol_ptr = critical_alarm_voltage_mv,
 	.critical_alarm_vol_cols = sizeof(critical_alarm_voltage_mv) / sizeof(int),
@@ -1361,6 +1362,7 @@ static struct pm8xxx_gpio_init switch_to_mhl_pmic_gpio_table[] = {
                          PM_GPIO_VIN_S4, PM_GPIO_STRENGTH_LOW,
                          PM_GPIO_FUNC_NORMAL, 0, 0),
 };
+#endif
 
 static void config_gpio_table(uint32_t *table, int len)
 {
@@ -1586,7 +1588,6 @@ static struct i2c_board_info msm_i2c_mhl_sii9234_info[] =
 	},
 };
 #endif
-#endif
 
 #ifdef CONFIG_USB_EHCI_MSM_HSIC
 
@@ -1713,7 +1714,7 @@ static struct android_usb_platform_data android_usb_pdata = {
 	.usb_id_pin_gpio = USB1_HS_ID_GPIO,
 	.usb_rmnet_interface = "HSIC:HSIC",
 	.usb_diag_interface = "diag,diag_mdm",
-	.fserial_init_string = "HSIC:modem,tty,tty:autobot,tty:serial,tty:autobot",
+	.fserial_init_string = "HSIC:modem,tty,tty:autobot,tty:serial,tty:autobot,tty:acm",
 	.serial_number = "000000000000",
 	.nluns		= 1,
 };
@@ -2804,6 +2805,7 @@ static struct synaptics_i2c_rmi_platform_data syn_ts_3k_xb_data[] = {
 		.tw_pin_mask = 0x0080,
 		.psensor_detection = 1,
 		.reduce_report_level = {60, 60, 50, 0, 0},
+		.block_touch_time_near = 200,
 		.config = {0x33, 0x32, 0x01, 0x06, 0x00, 0x7F, 0x03, 0x1E,
 			0x05, 0x09, 0x00, 0x01, 0x01, 0x00, 0x10, 0x38,
 			0x04, 0x80, 0x07, 0x02, 0x14, 0x1E, 0x05, 0x50,
@@ -2866,6 +2868,7 @@ static struct synaptics_i2c_rmi_platform_data syn_ts_3k_xb_data[] = {
 		.multitouch_calibration = 1,
 		.psensor_detection = 1,
 		.reduce_report_level = {60, 60, 50, 0, 0},
+		.block_touch_time_near = 200,
 		.config = {0x33, 0x32, 0x01, 0x04, 0x00, 0x7F, 0x03, 0x1E,
 			0x05, 0x09, 0x00, 0x01, 0x01, 0x00, 0x10, 0x38,
 			0x04, 0x80, 0x07, 0x02, 0x14, 0x1E, 0x05, 0x50,
@@ -2926,6 +2929,7 @@ static struct synaptics_i2c_rmi_platform_data syn_ts_3k_xb_data[] = {
 		.large_obj_check = 1,
 		.tw_pin_mask = 0x0080,
 		.multitouch_calibration = 1,
+		.block_touch_time_near = 200,
 		.config = {0x33, 0x32, 0x01, 0x00, 0x00, 0x7F, 0x03, 0x1E,
 			0x05, 0x08, 0x00, 0x19, 0x19, 0x00, 0x10, 0x4C,
 			0x04, 0x6C, 0x07, 0x02, 0x14, 0x1E, 0x05, 0x28,
@@ -3105,6 +3109,7 @@ static struct synaptics_i2c_rmi_platform_data syn_ts_3k_data[] = {
 		.default_config = 1,
 		.large_obj_check = 1,
 		.multitouch_calibration = 1,
+		.block_touch_time_near = 200,
 		.config = {0x33, 0x32, 0x00, 0x03, 0x04, 0x7F, 0x03, 0x1E,
 			0x05, 0x08, 0x00, 0x19, 0x19, 0x00, 0x10, 0x54,
 			0x06, 0x40, 0x0B, 0x02, 0x14, 0x23, 0x05, 0x50,
@@ -3162,6 +3167,7 @@ static struct synaptics_i2c_rmi_platform_data syn_ts_3k_data[] = {
 		.default_config = 2,
 		.large_obj_check = 1,
 		.multitouch_calibration = 1,
+		.block_touch_time_near = 200,
 		.config = {0x4D, 0x4F, 0x4F, 0x31, 0x04, 0x3F, 0x03, 0x1E,
 			0x05, 0xB1, 0x08, 0x0B, 0x19, 0x19, 0x00, 0x00,
 			0x54, 0x06, 0x40, 0x0B, 0x02, 0x14, 0x1E, 0x05,
@@ -3209,6 +3215,7 @@ static struct synaptics_i2c_rmi_platform_data syn_ts_3k_data[] = {
 		.display_height = 1280,
 		.gpio_irq = TP_ATTz,
 		.gpio_reset = TP_RSTz,
+		.block_touch_time_near = 200,
 		.default_config = 2,
 		.config = {0x30, 0x32, 0x30, 0x30, 0x84, 0x0F, 0x03, 0x1E,
 			0x05, 0x20, 0xB1, 0x00, 0x0B, 0x19, 0x19, 0x00,
@@ -3297,15 +3304,17 @@ static struct cm3629_platform_data cm36282_pdata = {
 	.ps_select = CM3629_PS1_ONLY,
 	.intr = PM8921_GPIO_PM_TO_SYS(PROXIMITY_INT),
 	.levels = { 1, 4, 150, 508, 786, 3531, 4967, 6000, 10478, 65535},
+	.correction = {100, 400, 900, 1600, 2500, 3600, 4900, 6400, 8100, 10000},
         .golden_adc = 0xDA0,
 	.power = NULL,
 	.cm3629_slave_address = 0xC0>>1,
 	.ps1_thd_set = 0x15,
 	.ps1_thd_no_cal = 0xF1,
 	.ps1_thd_with_cal = 0x11,
+        .ps_th_add = 5,
 	.ps_calibration_rule = 1,
-	.ps_conf1_val = CM3629_PS_DR_1_80 | CM3629_PS_IT_1_6T |
-			CM3629_PS1_PERS_3,
+	.ps_conf1_val = CM3629_PS_DR_1_40 | CM3629_PS_IT_1_6T |
+			CM3629_PS1_PERS_2,
 	.ps_conf2_val = CM3629_PS_ITB_1 | CM3629_PS_ITR_1 |
 			CM3629_PS2_INT_DIS | CM3629_PS1_INT_DIS,
 	.ps_conf3_val = CM3629_PS2_PROL_32,
@@ -3797,7 +3806,7 @@ static struct msm_rpmrs_level msm_rpmrs_levels[] = {
 		MSM_PM_SLEEP_MODE_POWER_COLLAPSE_STANDALONE,
 		MSM_RPMRS_LIMITS(ON, ACTIVE, MAX, ACTIVE),
 		true,
-		1300, 228, 1200000, 2152,
+		1300, 228, 1200000, 3212,
 	},
 
 	{
@@ -3811,35 +3820,35 @@ static struct msm_rpmrs_level msm_rpmrs_levels[] = {
 		MSM_PM_SLEEP_MODE_POWER_COLLAPSE,
 		MSM_RPMRS_LIMITS(ON, HSFS_OPEN, ACTIVE, RET_HIGH),
 		false,
-		6000, 119, 1850300, 9152,
+		6000, 119, 1850300, 10212,
 	},
 
 	{
 		MSM_PM_SLEEP_MODE_POWER_COLLAPSE,
 		MSM_RPMRS_LIMITS(OFF, GDHS, MAX, ACTIVE),
 		false,
-		9200, 68, 2839200, 16552,
+		9200, 68, 2839200, 17612,
 	},
 
 	{
 		MSM_PM_SLEEP_MODE_POWER_COLLAPSE,
 		MSM_RPMRS_LIMITS(OFF, HSFS_OPEN, MAX, ACTIVE),
 		false,
-		10300, 63, 3128000, 18352,
+		10300, 63, 3128000, 19412,
 	},
 
 	{
 		MSM_PM_SLEEP_MODE_POWER_COLLAPSE,
 		MSM_RPMRS_LIMITS(OFF, HSFS_OPEN, ACTIVE, RET_HIGH),
 		false,
-		18000, 10, 4602600, 27152,
+		18000, 10, 4602600, 28212,
 	},
 
 	{
 		MSM_PM_SLEEP_MODE_POWER_COLLAPSE,
 		MSM_RPMRS_LIMITS(OFF, HSFS_OPEN, RET_HIGH, RET_LOW),
 		false,
-		20000, 2, 5752000, 32152,
+		20000, 2, 5752000, 32312,
 	},
 };
 
@@ -4131,7 +4140,7 @@ static struct msm_spm_platform_data msm_spm_data[] __initdata = {
 		.reg_init_values[MSM_SPM_REG_SAW2_AVS_HYSTERESIS] = 0x00,
 #endif
 		.reg_init_values[MSM_SPM_REG_SAW2_SPM_CTL] = 0x01,
-		.reg_init_values[MSM_SPM_REG_SAW2_PMIC_DLY] = 0x02020205,
+                .reg_init_values[MSM_SPM_REG_SAW2_PMIC_DLY] = 0x02070207,
 		.reg_init_values[MSM_SPM_REG_SAW2_PMIC_DATA_0] = 0x0060009C,
 		.reg_init_values[MSM_SPM_REG_SAW2_PMIC_DATA_1] = 0x0000001C,
 		.vctl_timeout_us = 50,
@@ -4146,7 +4155,7 @@ static struct msm_spm_platform_data msm_spm_data[] __initdata = {
 		.reg_init_values[MSM_SPM_REG_SAW2_AVS_HYSTERESIS] = 0x00,
 #endif
 		.reg_init_values[MSM_SPM_REG_SAW2_SPM_CTL] = 0x01,
-		.reg_init_values[MSM_SPM_REG_SAW2_PMIC_DLY] = 0x02020205,
+		.reg_init_values[MSM_SPM_REG_SAW2_PMIC_DLY] = 0x02070207,
 		.reg_init_values[MSM_SPM_REG_SAW2_PMIC_DATA_0] = 0x0060009C,
 		.reg_init_values[MSM_SPM_REG_SAW2_PMIC_DATA_1] = 0x0000001C,
 		.vctl_timeout_us = 50,
@@ -4161,7 +4170,7 @@ static struct msm_spm_platform_data msm_spm_data[] __initdata = {
 		.reg_init_values[MSM_SPM_REG_SAW2_AVS_HYSTERESIS] = 0x00,
 #endif
 		.reg_init_values[MSM_SPM_REG_SAW2_SPM_CTL] = 0x01,
-		.reg_init_values[MSM_SPM_REG_SAW2_PMIC_DLY] = 0x02020205,
+		.reg_init_values[MSM_SPM_REG_SAW2_PMIC_DLY] = 0x02070207,
 		.reg_init_values[MSM_SPM_REG_SAW2_PMIC_DATA_0] = 0x0060009C,
 		.reg_init_values[MSM_SPM_REG_SAW2_PMIC_DATA_1] = 0x0000001C,
 		.vctl_timeout_us = 50,
@@ -4176,7 +4185,7 @@ static struct msm_spm_platform_data msm_spm_data[] __initdata = {
 		.reg_init_values[MSM_SPM_REG_SAW2_AVS_HYSTERESIS] = 0x00,
 #endif
 		.reg_init_values[MSM_SPM_REG_SAW2_SPM_CTL] = 0x01,
-		.reg_init_values[MSM_SPM_REG_SAW2_PMIC_DLY] = 0x02020205,
+		.reg_init_values[MSM_SPM_REG_SAW2_PMIC_DLY] = 0x02070207,
 		.reg_init_values[MSM_SPM_REG_SAW2_PMIC_DATA_0] = 0x0060009C,
 		.reg_init_values[MSM_SPM_REG_SAW2_PMIC_DATA_1] = 0x0000001C,
 		.vctl_timeout_us = 50,
@@ -4565,11 +4574,13 @@ static struct platform_device *common_devices[] __initdata = {
 #ifdef CONFIG_MSM_RTB
 	&impression_j_rtb_device,
 #endif
+#ifdef CONFIG_MSM_GEMINI
+	&msm8960_gemini_device,
+#endif
 #ifdef CONFIG_BT
 	&msm_device_uart_dm6,
 	&impression_j_rfkill,
 #endif
-	&msm8960_gemini_device,
 #ifdef CONFIG_HTC_BATT_8960
 	&htc_battery_pdev,
 #endif
@@ -4592,12 +4603,15 @@ static struct platform_device *common_devices[] __initdata = {
 #endif 
 	&apq_compr_dsp,
 	&apq_multi_ch_pcm,
+#ifdef CONFIG_AUDIO_LOW_LATENCY
+	&apq_lowlatency_pcm,
+#endif
 };
 
 static struct platform_device *cdp_devices[] __initdata = {
 	&apq8064_device_uart_gsbi1,
 	&apq8064_device_uart_gsbi2,
-#ifdef CONFIG_SERIAL_IRDA
+#if defined(CONFIG_SERIAL_IRDA) || defined(CONFIG_SERIAL_CIR)
 	&apq8064_device_uart_gsbi3, 
 #endif
 	&apq8064_device_uart_gsbi7,
@@ -4666,7 +4680,7 @@ static struct msm_i2c_platform_data impression_j_i2c_qup_gsbi3_pdata = {
 	.clk_freq = 400000,
 	.src_clk_rate = 24000000,
 	
-#ifdef CONFIG_SERIAL_IRDA
+#if defined(CONFIG_SERIAL_IRDA) || defined(CONFIG_SERIAL_CIR)
 	.share_uart_flag = 1, 
 #endif
 };
@@ -4677,7 +4691,7 @@ static struct msm_i2c_platform_data impression_j_i2c_qup_gsbi4_pdata = {
 	.share_uart_flag = 1,
 };
 
-#ifdef CONFIG_SERIAL_IRDA
+#if defined(CONFIG_SERIAL_IRDA) || defined(CONFIG_SERIAL_CIR)
 int impression_irda_enable(int ebl)
 {
 	int rc = 0;
@@ -4979,7 +4993,6 @@ static void __init register_i2c_devices(void)
 
 #ifdef CONFIG_FB_MSM_HDMI_MHL
 #ifdef CONFIG_FB_MSM_HDMI_MHL_SII9234
-	
 	mhl_sii9234_device_data.gpio_reset = PM8921_GPIO_PM_TO_SYS(MHL_RSTz);
 #endif
 #endif
@@ -5270,7 +5283,7 @@ static void impression_j_init_1seg(void)
 }
 #endif
 
-#ifdef CONFIG_SERIAL_IRDA
+#if defined(CONFIG_SERIAL_IRDA) || defined(CONFIG_SERIAL_CIR)
 static uint32_t msm_uart_gsbi3_gpio[] = {
 	GPIO_CFG(SIR_TX, 1, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_8MA),
 	GPIO_CFG(SIR_RX, 1, GPIO_CFG_INPUT, GPIO_CFG_NO_PULL, GPIO_CFG_8MA),
@@ -5369,7 +5382,7 @@ static void __init impression_j_common_init(void)
 
 	impression_j_i2c_init();
 
-#ifdef CONFIG_SERIAL_IRDA
+#if defined(CONFIG_SERIAL_IRDA) || defined(CONFIG_SERIAL_CIR)
 	impression_j_irda_init();
 #endif
 
@@ -5504,6 +5517,17 @@ unsigned long ion_kgsl_heap_paddr = 0;
 
 static void __init impression_j_allocate_memory_regions(void)
 {
+#ifdef CONFIG_KEXEC_HARDBOOT
+	// Reserve space for hardboot page at the end of first system ram block
+	struct membank* bank = &meminfo.bank[0];
+	phys_addr_t start = bank->start + bank->size - SZ_1M;
+	int ret = memblock_remove(start, SZ_1M);
+	if(!ret)
+		pr_info("Hardboot page reserved at 0x%X\n", start);
+	else
+		pr_err("Failed to reserve space for hardboot page at 0x%X!\n", start);
+#endif
+
 #ifdef CONFIG_FB_MSM
 	impression_j_allocate_fb_region();
 #endif
@@ -5544,6 +5568,10 @@ static void __init impression_j_cdp_init(void)
         if(!cpu_is_krait_v1())
                 set_two_phase_freq(1134000);
 #endif
+  set_input_event_min_freq_by_cpu(1, 1134000);
+  set_input_event_min_freq_by_cpu(2, 1026000);
+  set_input_event_min_freq_by_cpu(3, 810000);
+  set_input_event_min_freq_by_cpu(4, 810000);
 
 	
 	

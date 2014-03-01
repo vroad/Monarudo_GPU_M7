@@ -25,7 +25,7 @@ VREG_CONSUMERS(L2) = {
 	REGULATOR_SUPPLY("8921_l2",		NULL),
 	REGULATOR_SUPPLY("mipi_csi_vdd",	"msm_csiphy.0"),
 	REGULATOR_SUPPLY("mipi_csi_vdd",	"msm_csiphy.1"),
-        REGULATOR_SUPPLY("mipi_csi_vdd",	"msm_csiphy.2"),
+	REGULATOR_SUPPLY("mipi_csi_vdd",	"msm_csiphy.2"),
 	REGULATOR_SUPPLY("lvds_pll_vdda",	"lvds.0"),
 	REGULATOR_SUPPLY("dsi1_pll_vdda",	"mipi_dsi.1"),
 };
@@ -67,6 +67,7 @@ VREG_CONSUMERS(L10) = {
 	REGULATOR_SUPPLY("8921_l10",		NULL),
 	REGULATOR_SUPPLY("iris_vddpa",		"wcnss_wlan.0"),
         REGULATOR_SUPPLY("dsi1_avdd",           "mipi_dsi.1"),
+	REGULATOR_SUPPLY("cir_3v",		NULL),
 };
 VREG_CONSUMERS(L11) = {
 	REGULATOR_SUPPLY("8921_l11",		NULL),
@@ -546,6 +547,7 @@ impression_j_rpm_regulator_init_data[] __devinitdata = {
 	
 	RPM_NCP(NCP, 0,    0, 1800000, 1800000, "8921_l6", 1p60),
 };
+
 
 #define RPM_REG_MAP(_id, _sleep_also, _voter, _supply, _dev_name) \
 	{ \

@@ -20,6 +20,7 @@
 #include <linux/module.h>
 #include "board-impression_j.h"
 #include "../sound/soc/msm/msm-pcm-routing.h"
+#include "../sound/soc/msm/msm-compr-q6.h"
 #include <linux/gpio.h>
 #include <mach/tpa6185.h>
 #include <mach/rt5501.h>
@@ -27,7 +28,7 @@ static atomic_t q6_effect_mode = ATOMIC_INIT(-1);
 #define HAC_PAMP_GPIO	6
 static struct regulator *reg_8921_lvs2;
 extern unsigned int system_rev;
-#include "../sound/soc/msm/msm-compr-q6.h"
+
 static int power_on_amp(char *power, struct regulator **regul)
 {
 	int rc;

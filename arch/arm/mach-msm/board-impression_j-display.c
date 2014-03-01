@@ -98,8 +98,17 @@ static int impression_j_detect_panel(const char *name)
 	return -ENODEV;
 }
 
+#ifdef CONFIG_UPDATE_LCDC_LUT
+int update_preset_lcdc_lut(void)
+{
+  return 0;
+}
+#endif
 static struct msm_fb_platform_data msm_fb_pdata = {
 	.detect_client = impression_j_detect_panel,
+#ifdef CONFIG_UPDATE_LCDC_LUT
+  .update_lcdc_lut = update_preset_lcdc_lut,
+#endif
 };
 
 static struct platform_device msm_fb_device = {
@@ -247,12 +256,6 @@ static struct lcdc_platform_data dtv_pdata = {
 };
 #endif
 
-static int mdp_core_clk_rate_table[] = {
-	200000000,
-	200000000,
-	200000000,
-	200000000,
-};
 
 struct mdp_reg *mdp_gamma = NULL;
 int mdp_gamma_count = 0;
@@ -527,9 +530,6 @@ int impression_mdp_gamma(void)
 
 static struct msm_panel_common_pdata mdp_pdata = {
 	.gpio = MDP_VSYNC_GPIO,
-	.mdp_core_clk_rate = 200000000,
-	.mdp_core_clk_table = mdp_core_clk_rate_table,
-	.num_mdp_clk = ARRAY_SIZE(mdp_core_clk_rate_table),
 #ifdef CONFIG_MSM_BUS_SCALING
 	.mdp_bus_scale_table = &mdp_bus_scale_pdata,
 #endif
@@ -557,7 +557,6 @@ void __init impression_j_mdp_writeback(struct memtype_reserve* reserve_table)
 #endif
 }
 static int first_init = 1;
-static bool dsi_power_on;
 struct dcs_cmd_req cmdreq;
 uint32_t cfg_panel_te_active[] = {GPIO_CFG(LCD_TE, 1, GPIO_CFG_INPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA)};
 uint32_t cfg_panel_te_sleep[] = {GPIO_CFG(LCD_TE, 0, GPIO_CFG_INPUT, GPIO_CFG_PULL_DOWN, GPIO_CFG_2MA)};
@@ -567,6 +566,7 @@ static struct dsi_cmd_desc nvt_LowTemp_wrkr_enter[] = {
 };
 
 static struct dsi_cmd_desc nvt_LowTemp_wrkr_exit[] = {
+
 	{DTYPE_DCS_WRITE1, 1, 0, 0, 0, 2, (char[]){0x26, 0x00}},
 	{DTYPE_DCS_WRITE1, 1, 0, 0, 10, 2, (char[]){0xFF, 0x00}},
 };
@@ -574,6 +574,7 @@ static struct dsi_cmd_desc nvt_LowTemp_wrkr_exit[] = {
 
 static int mipi_dsi_panel_power(int on)
 {
+	static bool dsi_power_on = false;
 	static struct regulator *reg_lvs5, *reg_l10, *reg_l2;
 	static int gpio11;
 	int rc;
@@ -768,6 +769,7 @@ static struct dsi_buf impression_j_panel_tx_buf;
 static struct dsi_buf impression_j_panel_rx_buf;
 static struct dsi_cmd_desc *cmd_on_cmds = NULL;
 static int cmd_on_cmds_count = 0;
+static int cmd_off_cmds_count = 0;
 
 static char enter_sleep[2] = {0x10, 0x00}; 
 static char exit_sleep[2] = {0x11, 0x00}; 
@@ -1117,6 +1119,23 @@ static void impression_j_display_on(struct msm_fb_data_type *mfd)
 	cmdreq.cmds = display_on_cmds;
 	cmdreq.cmds_cnt = 1;
 	cmdreq.flags = CMD_REQ_COMMIT;
+	if (mfd && mfd->panel_info.type == MIPI_CMD_PANEL)
+		cmdreq.flags |= CMD_CLK_CTRL;
+	cmdreq.rlen = 0;
+	cmdreq.cb = NULL;
+
+	mipi_dsi_cmdlist_put(&cmdreq);
+
+	PR_DISP_INFO("%s\n", __func__);
+}
+
+static void impression_j_display_off(struct msm_fb_data_type *mfd)
+{
+	cmdreq.cmds = display_off_cmds;
+	cmdreq.cmds_cnt = cmd_off_cmds_count;
+	cmdreq.flags = CMD_REQ_COMMIT;
+	if (mfd && mfd->panel_info.type == MIPI_CMD_PANEL)
+		cmdreq.flags |= CMD_CLK_CTRL;
 	cmdreq.rlen = 0;
 	cmdreq.cb = NULL;
 
@@ -1162,10 +1181,6 @@ static void impression_j_set_backlight(struct msm_fb_data_type *mfd)
 	mipi  = &mfd->panel_info.mipi;
 #if 0
 	mutex_lock(&mfd->dma->ov_mutex);
-	if (mdp4_overlay_dsi_state_get() <= ST_DSI_SUSPEND) {
-		mutex_unlock(&mfd->dma->ov_mutex);
-		return;
-	}
 
 	led_pwm1[1] = impression_j_shrink_pwm((unsigned char)(mfd->bl_level));
 
@@ -1178,6 +1193,8 @@ static void impression_j_set_backlight(struct msm_fb_data_type *mfd)
 	cmdreq.cmds = backlight_cmds;
 	cmdreq.cmds_cnt = 1;
 	cmdreq.flags = CMD_REQ_COMMIT;
+	if (mfd && mfd->panel_info.type == MIPI_CMD_PANEL)
+		cmdreq.flags |= CMD_CLK_CTRL;
 	cmdreq.rlen = 0;
 	cmdreq.cb = NULL;
 
@@ -1198,6 +1215,7 @@ static struct msm_fb_panel_data impression_j_panel_data = {
 	.off	= impression_j_lcd_off,
 	.set_backlight = impression_j_set_backlight,
 	.display_on = impression_j_display_on,
+	.display_off = impression_j_display_off,
 };
 
 static struct msm_panel_info pinfo;
@@ -1339,6 +1357,7 @@ static int __init mipi_cmd_sharp_init(void)
 
 	cmd_on_cmds = sharp_cmd_on_cmds;
 	cmd_on_cmds_count = ARRAY_SIZE(sharp_cmd_on_cmds);
+	cmd_off_cmds_count = ARRAY_SIZE(display_off_cmds);
 
 	PR_DISP_INFO("%s\n", __func__);
 	return ret;
