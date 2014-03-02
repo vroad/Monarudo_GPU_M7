@@ -5370,9 +5370,9 @@ static void __init impression_j_common_init(void)
 	if (msm_xo_init())
 		pr_err("Failed to initialize XO votes\n");
 	
-	clk_ignor_list_add("msm_sdcc.4", "core_clk", &apq8064_clock_init_data);
+	clk_ignor_list_add("msm_sdcc.4", "core_clk", &apq8064_clock_init_data_r2);
 	
-	msm_clock_init(&apq8064_clock_init_data);
+	msm_clock_init(&apq8064_clock_init_data_r2);
 	impression_j_init_gpiomux();
 #ifdef CONFIG_RESET_BY_CABLE_IN
 	pr_info("[CABLE] Enable Ac Reset Function.(%d) \n", system_rev);
