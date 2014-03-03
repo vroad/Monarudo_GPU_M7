@@ -210,9 +210,9 @@ static void syn_handle_block_touch(struct synaptics_ts_data *ts, int enable)
 
 
 #ifdef CONFIG_TOUCHSCREEN_SYNAPTICS_SWEEP2WAKE
-#define BACK_BUTTON		180
-#define HOME_BUTTON		540
-#define MENU_BUTTON		900
+#define BACK_BUTTON		280
+#define HOME_BUTTON		600
+#define MENU_BUTTON		975
 
 static int pocket_detect = 1;
 int s2w_switch = 1;
@@ -221,7 +221,7 @@ int s2w_temp = 1;
 bool exec_count = true, s2w_switch_changed = false;;
 bool scr_on_touch = false, led_exec_count = false, barrier[2] = {false, false};
 
-int barrier1 = 0, barrier2 = 0, barrier3 = 0, barrier4 = 0;
+int barrier1 = 0, barrier2 = 0, barrier3 = 0;
 
 typedef struct {
 	int	x;
@@ -229,9 +229,9 @@ typedef struct {
 } button;
 
 static button buttons[] = {
-			{180, "BACK"},			
-			{540, "HOME"},
-			{900, "MENU"},
+			{280, "BACK"},			
+			{600, "HOME"},
+			{975, "MENU"},
 };
 
 int s2w_startbutton = -1;
@@ -315,6 +315,22 @@ static int __init synaptic_read_s2w_end_cmdline(char *s2w_end)
 	return 1;
 }
 __setup("s2w_end=", synaptic_read_s2w_end_cmdline);
+
+static int __init synaptic_read_dt2w_cmdline(char *dt2w)
+{
+	if (strcmp(dt2w, "1") == 0) {
+		printk(KERN_INFO "[DOUBLETAP2WAKE]: Doubletap2Wake enabled. | dt2w='%s'", dt2w);
+		dt2w_switch = 1;
+	} else if (strcmp(dt2w, "0") == 0) {
+		printk(KERN_INFO "[DOUBLETAP2WAKE]: Doubletap2Wake disabled. | dt2w='%s'", dt2w);
+		dt2w_switch = 0;
+	} else {
+		printk(KERN_INFO "[DOUBLETAP2WAKE]: No valid input found. Doubletap2Wake disabled. | dt2w='%s'", dt2w);
+		dt2w_switch = 0;
+	}
+	return 1;
+}
+__setup("dt2w=", synaptic_read_dt2w_cmdline);
 #endif
 
 extern void sweep2wake_setdev(struct input_dev * input_device) {
@@ -2125,10 +2141,9 @@ static ssize_t synaptic_sweep2wake_startbutton_dump(struct device *dev,
 	} else 
 		s2w_startbutton = s2w_tempbutton;
 
-	barrier1 = s2w_startbutton - 100; //0;
-	barrier2 = ((s2w_endbutton - s2w_startbutton) / 4) + s2w_startbutton; //333;
-	barrier3 = (((s2w_endbutton - s2w_startbutton) / 4) * 3) + s2w_startbutton; //667;
-	barrier4 = s2w_endbutton + 100; //1000;
+	barrier1 = s2w_startbutton - 100; 
+	barrier2 = ((s2w_endbutton - s2w_startbutton) / 2) + s2w_startbutton; 
+	barrier3 = s2w_endbutton +100;
 
 	return count;
 }
@@ -2143,6 +2158,7 @@ static ssize_t synaptic_sweep2wake_endbutton_show(struct device *dev,
 	int i = 0;
 	size_t count = 0;
 	bool found = false;
+	
 
 	for (i = 0; i < sizeof(buttons)/sizeof(button); i++)
 	{
@@ -2176,10 +2192,9 @@ static ssize_t synaptic_sweep2wake_endbutton_dump(struct device *dev,
 	} else 
 		s2w_endbutton = s2w_tempbutton;
 
-	barrier1 = s2w_startbutton - 100; //0;
-	barrier2 = ((s2w_endbutton - s2w_startbutton) / 4) + s2w_startbutton; //333;
-	barrier3 = (((s2w_endbutton - s2w_startbutton) / 4) * 3) + s2w_startbutton; //667;
-	barrier4 = s2w_endbutton + 100; //1000;
+	barrier1 = s2w_startbutton - 100; 
+	barrier2 = ((s2w_endbutton - s2w_startbutton) / 2) + s2w_startbutton; 
+	barrier3 = s2w_endbutton +100;
 
 	return count;
 }
@@ -2641,7 +2656,7 @@ static void synaptics_ts_finger_func(struct synaptics_ts_data *ts)
 				printk(KERN_INFO "[TP] Finger leave\n");
 #ifdef CONFIG_TOUCHSCREEN_SYNAPTICS_SWEEP2WAKE
 				/* if finger released, reset count & barriers */
-				if ((((ts->finger_count > 0)?1:0) == 0) && (s2w_switch > 0 && dt2w_switch > 0)) {
+				if ((((ts->finger_count > 0)?1:0) == 0) && (s2w_switch > 0 || dt2w_switch > 0)) {
 					if ((s2w_switch == 2) &&
 			    	(scr_suspended == true) &&
 			    	(led_exec_count == false) &&
@@ -2853,13 +2868,13 @@ static void synaptics_ts_finger_func(struct synaptics_ts_data *ts)
 			} else if ((s2w_switch > 0) && (scr_suspended == false) && (ts->finger_count == 1)) {
 				scr_on_touch=true;
 				if ((barrier[0] == true) ||
-				   ((finger_data[i][0] < barrier4) &&
-			    	    (finger_data[i][0] > barrier3) &&
+				   ((finger_data[i][0] < barrier3) &&
+			    	    (finger_data[i][0] > barrier2) &&
 				    (finger_data[i][1] > 2725))) {
 					barrier[0] = true;
 					if ((barrier[1] == true) ||
-					   ((finger_data[i][0] < barrier3) &&
-					    (finger_data[i][0] > barrier2) &&
+					   ((finger_data[i][0] < barrier2) &&
+					    (finger_data[i][0] > barrier1) &&
 					    (finger_data[i][1] > 2725))) {
 						barrier[1] = true;
 						if ((finger_data[i][0] < barrier2) &&
@@ -3849,7 +3864,20 @@ static int syn_probe_init(void *arg)
 	if (rmi_char_dev_register())
 		printk(KERN_INFO "[TP] %s: error register char device", __func__);
 #endif
+#ifdef CONFIG_TOUCHSCREEN_SYNAPTICS_SWEEP2WAKE
+#ifdef CONFIG_TOUCHSCREEN_SYNAPTICS_SWEEP2WAKE_START
+	if (s2w_startbutton <= 0)
+		s2w_startbutton = sweep2wake_buttonset(CONFIG_TOUCHSCREEN_SYNAPTICS_SWEEP2WAKE_START);
+#endif 
+#ifdef CONFIG_TOUCHSCREEN_SYNAPTICS_SWEEP2WAKE_END
+	if (s2w_endbutton <= 0)
+		s2w_endbutton = sweep2wake_buttonset(CONFIG_TOUCHSCREEN_SYNAPTICS_SWEEP2WAKE_END);
+#endif 
 
+	barrier1 = s2w_startbutton - 100; 
+	barrier2 = ((s2w_endbutton - s2w_startbutton) / 2) + s2w_startbutton; 
+	barrier3 = s2w_endbutton +100;
+#endif
 	printk(KERN_INFO "[TP] synaptics_ts_probe: Start touchscreen %s in %s mode\n", ts->input_dev->name, ts->use_irq ? "interrupt" : "polling");
 
 	return 0;
@@ -3949,22 +3977,6 @@ err_check_functionality_failed:
 static int synaptics_ts_remove(struct i2c_client *client)
 {
 	struct synaptics_ts_data *ts = i2c_get_clientdata(client);
-
-#ifdef CONFIG_TOUCHSCREEN_SYNAPTICS_SWEEP2WAKE
-#ifdef CONFIG_TOUCHSCREEN_SYNAPTICS_SWEEP2WAKE_START
-	if (s2w_startbutton <= 0)
-		s2w_startbutton = sweep2wake_buttonset(CONFIG_TOUCHSCREEN_SYNAPTICS_SWEEP2WAKE_START);
-#endif 
-#ifdef CONFIG_TOUCHSCREEN_SYNAPTICS_SWEEP2WAKE_END
-	if (s2w_endbutton <= 0)
-		s2w_endbutton = sweep2wake_buttonset(CONFIG_TOUCHSCREEN_SYNAPTICS_SWEEP2WAKE_END);
-#endif 
-
-	barrier1 = s2w_startbutton - 100; 
-	barrier2 = ((s2w_endbutton - s2w_startbutton) / 4) + s2w_startbutton; 
-	barrier3 = (((s2w_endbutton - s2w_startbutton) / 4) * 3) + s2w_startbutton; 
-	barrier4 = s2w_endbutton + 100; 
-#endif
 
 	unregister_early_suspend(&ts->early_suspend);
 	if (ts->use_irq)
