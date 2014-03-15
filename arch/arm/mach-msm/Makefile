@@ -381,6 +381,8 @@ obj-$(CONFIG_MACH_M7_WLJ) += board-m7wlj-all.o board-m7wlj-regulator.o
 obj-$(CONFIG_MACH_M7_DCG) += board-m7dcg-all.o board-m7china-regulator.o
 obj-$(CONFIG_MACH_M7_DUG) += board-m7dug-all.o board-m7china-regulator.o
 
+obj-$(CONFIG_FORCE_FAST_CHARGE) += fastchg.o
+
 obj-$(CONFIG_MACH_MONARUDO) += htc_util.o
 obj-$(CONFIG_MACH_DELUXE_J) += htc_util.o
 obj-$(CONFIG_MACH_DELUXE_UB1) += htc_util.o

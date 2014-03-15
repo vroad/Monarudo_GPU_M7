@@ -2952,6 +2952,12 @@ config HTC_POWEROFF_MODEM_IN_OFFMODE_CHARGING
         depends on MSM_MODEM_8960
         help
          To power off modem in offmode charging
+config FORCE_FAST_CHARGE
+        bool "Force AC charge mode at will"
+        default y
+        help
+         A simple sysfs interface to force adapters that
+         are detected as USB to charge as AC.
 
 config HTC_STORE_MODEM_RESET_INFO
         bool "For store modem reset information"
